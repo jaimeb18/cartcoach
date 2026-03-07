@@ -1,364 +1,44 @@
 {
   "catalog": [
-    {
-      "id": "1",
-      "name": "Anker Wireless Headphones",
-      "price": 49.99,
-      "category": "Electronics",
-      "keywords": ["headphones", "wireless", "audio", "earbuds"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "2",
-      "name": "Sony ZX110 Headphones",
-      "price": 19.99,
-      "category": "Electronics",
-      "keywords": ["headphones", "audio", "sony"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "3",
-      "name": "Mpow Bluetooth Headphones",
-      "price": 29.99,
-      "category": "Electronics",
-      "keywords": ["headphones", "bluetooth", "wireless"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "4",
-      "name": "Amazon Basics USB-C Cable",
-      "price": 8.99,
-      "category": "Electronics",
-      "keywords": ["cable", "usb", "charger", "charging"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "5",
-      "name": "Puma Running Shoes",
-      "price": 64.99,
-      "category": "Fashion",
-      "keywords": ["shoes", "running", "sneakers", "athletic"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "6",
-      "name": "New Balance 411 Running Shoes",
-      "price": 54.99,
-      "category": "Fashion",
-      "keywords": ["shoes", "running", "sneakers", "athletic"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "7",
-      "name": "Saucony Cohesion Running Shoes",
-      "price": 59.95,
-      "category": "Fashion",
-      "keywords": ["shoes", "running", "sneakers", "saucony"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "8",
-      "name": "e.l.f. Foundation",
-      "price": 12.99,
-      "category": "Beauty",
-      "keywords": ["foundation", "makeup", "beauty", "cosmetics"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "9",
-      "name": "Maybelline Fit Me Foundation",
-      "price": 8.97,
-      "category": "Beauty",
-      "keywords": ["foundation", "maybelline", "makeup", "beauty"],
-      "source": "Walmart",
-      "url": "https://walmart.com"
-    },
-    {
-      "id": "10",
-      "name": "AmazonBasics Laptop Backpack",
-      "price": 27.99,
-      "category": "Fashion",
-      "keywords": ["backpack", "bag", "laptop", "school"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "11",
-      "name": "Hanes Men's T-Shirt 6-Pack",
-      "price": 22.00,
-      "category": "Fashion",
-      "keywords": ["tshirt", "shirt", "clothing", "fashion", "apparel"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "12",
-      "name": "Insignia Bluetooth Speaker",
-      "price": 29.99,
-      "category": "Electronics",
-      "keywords": ["speaker", "bluetooth", "audio", "portable"],
-      "source": "Best Buy",
-      "url": "https://bestbuy.com"
-    },
-    {
-      "id": "13",
-      "name": "Generic Yoga Mat",
-      "price": 19.99,
-      "category": "Sports",
-      "keywords": ["yoga", "mat", "exercise", "fitness", "gym"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "14",
-      "name": "TOPLUS Yoga Mat",
-      "price": 25.99,
-      "category": "Sports",
-      "keywords": ["yoga", "mat", "exercise", "fitness"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "15",
-      "name": "Kindle Paperwhite (Certified Refurbished)",
-      "price": 89.99,
-      "category": "Electronics",
-      "keywords": ["kindle", "ereader", "books", "reading", "tablet"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "16",
-      "name": "Anker Soundcore Bluetooth Speaker",
-      "price": 21.99,
-      "category": "Electronics",
-      "keywords": ["speaker", "bluetooth", "audio", "portable", "anker"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "17",
-      "name": "Amazon Basics Wireless Mouse",
-      "price": 14.99,
-      "category": "Electronics",
-      "keywords": ["mouse", "wireless", "computer", "laptop", "peripheral"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "18",
-      "name": "Logitech M185 Wireless Mouse",
-      "price": 19.99,
-      "category": "Electronics",
-      "keywords": ["mouse", "wireless", "logitech", "computer", "peripheral"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "19",
-      "name": "Amazon Basics Mechanical Keyboard",
-      "price": 39.99,
-      "category": "Electronics",
-      "keywords": ["keyboard", "mechanical", "computer", "typing", "gaming"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "20",
-      "name": "Anker PowerCore 10000 Power Bank",
-      "price": 25.99,
-      "category": "Electronics",
-      "keywords": ["power bank", "charger", "portable", "battery", "anker"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "21",
-      "name": "NYX Matte Liquid Lipstick",
-      "price": 9.99,
-      "category": "Beauty",
-      "keywords": ["lipstick", "lip", "makeup", "beauty", "matte"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "22",
-      "name": "e.l.f. Mascara",
-      "price": 10.00,
-      "category": "Beauty",
-      "keywords": ["mascara", "lashes", "makeup", "beauty", "eyes"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "23",
-      "name": "Wet n Wild Eyeshadow Palette",
-      "price": 6.99,
-      "category": "Beauty",
-      "keywords": ["eyeshadow", "palette", "makeup", "beauty", "eyes"],
-      "source": "Walmart",
-      "url": "https://walmart.com"
-    },
-    {
-      "id": "24",
-      "name": "CeraVe Moisturizing Cream",
-      "price": 14.99,
-      "category": "Beauty",
-      "keywords": ["moisturizer", "cream", "skincare", "beauty", "lotion"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "25",
-      "name": "Neutrogena Hydro Boost Gel",
-      "price": 18.99,
-      "category": "Beauty",
-      "keywords": ["moisturizer", "gel", "skincare", "beauty", "hydration"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "26",
-      "name": "Resistance Bands Set",
-      "price": 12.99,
-      "category": "Sports",
-      "keywords": ["resistance", "bands", "workout", "exercise", "fitness", "gym"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "27",
-      "name": "AmazonBasics Dumbbell Set",
-      "price": 34.99,
-      "category": "Sports",
-      "keywords": ["dumbbells", "weights", "workout", "exercise", "fitness", "gym"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "28",
-      "name": "Gaiam Foam Roller",
-      "price": 19.99,
-      "category": "Sports",
-      "keywords": ["foam roller", "recovery", "massage", "fitness", "stretching"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "29",
-      "name": "Champion Men's Jersey T-Shirt",
-      "price": 12.00,
-      "category": "Sports",
-      "keywords": ["tshirt", "shirt", "athletic", "sportswear", "champion"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "30",
-      "name": "Amazon Basics Jump Rope",
-      "price": 7.99,
-      "category": "Sports",
-      "keywords": ["jump rope", "cardio", "workout", "exercise", "fitness"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "31",
-      "name": "AmazonBasics Desk Lamp",
-      "price": 17.99,
-      "category": "Home",
-      "keywords": ["lamp", "desk", "light", "home", "office"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "32",
-      "name": "AmazonBasics Microwave",
-      "price": 59.99,
-      "category": "Home",
-      "keywords": ["microwave", "kitchen", "appliance", "home", "cooking"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "33",
-      "name": "Utopia Bedding Pillow 2-Pack",
-      "price": 19.99,
-      "category": "Home",
-      "keywords": ["pillow", "bedding", "sleep", "home", "bedroom"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "34",
-      "name": "AmazonBasics Hangers 30-Pack",
-      "price": 8.99,
-      "category": "Home",
-      "keywords": ["hangers", "closet", "storage", "home", "organization"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "35",
-      "name": "Instant Pot Duo 3-Quart",
-      "price": 69.99,
-      "category": "Home",
-      "keywords": ["instant pot", "pressure cooker", "kitchen", "cooking", "appliance"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "36",
-      "name": "Atomic Habits by James Clear",
-      "price": 11.98,
-      "category": "Books",
-      "keywords": ["book", "habits", "self help", "productivity", "atomic"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "37",
-      "name": "The Psychology of Money",
-      "price": 13.29,
-      "category": "Books",
-      "keywords": ["book", "money", "finance", "investing", "psychology"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "38",
-      "name": "Deep Work by Cal Newport",
-      "price": 12.99,
-      "category": "Books",
-      "keywords": ["book", "productivity", "focus", "work", "deep work"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "39",
-      "name": "Kindle Basic (Refurbished)",
-      "price": 49.99,
-      "category": "Electronics",
-      "keywords": ["kindle", "ereader", "books", "reading"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    },
-    {
-      "id": "40",
-      "name": "Fruit of the Loom Women's T-Shirts 6-Pack",
-      "price": 18.99,
-      "category": "Fashion",
-      "keywords": ["tshirt", "shirt", "clothing", "fashion", "apparel", "women"],
-      "source": "Amazon",
-      "url": "https://amazon.com"
-    }
+    {"id":"1","name":"Anker Wireless Headphones","price":49.99,"category":"Electronics","keywords":["headphones","wireless","audio","earbuds"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"2","name":"Sony ZX110 Headphones","price":19.99,"category":"Electronics","keywords":["headphones","audio","sony"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"3","name":"Mpow Bluetooth Headphones","price":29.99,"category":"Electronics","keywords":["headphones","bluetooth","wireless"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"4","name":"Amazon Basics USB-C Cable","price":8.99,"category":"Electronics","keywords":["cable","usb","charger","charging"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"5","name":"Puma Running Shoes","price":64.99,"category":"Fashion","keywords":["shoes","running","sneakers","athletic"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"6","name":"New Balance 411 Running Shoes","price":54.99,"category":"Fashion","keywords":["shoes","running","sneakers","athletic"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"7","name":"Saucony Cohesion Running Shoes","price":59.95,"category":"Fashion","keywords":["shoes","running","sneakers","saucony"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"8","name":"e.l.f. Foundation","price":12.99,"category":"Beauty","keywords":["foundation","makeup","beauty","cosmetics"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"9","name":"Maybelline Fit Me Foundation","price":8.97,"category":"Beauty","keywords":["foundation","maybelline","makeup","beauty"],"source":"Walmart","url":"https://walmart.com"},
+    {"id":"10","name":"AmazonBasics Laptop Backpack","price":27.99,"category":"Fashion","keywords":["backpack","bag","laptop","school"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"11","name":"Hanes Men's T-Shirt 6-Pack","price":22.00,"category":"Fashion","keywords":["tshirt","shirt","clothing","fashion","apparel"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"12","name":"Insignia Bluetooth Speaker","price":29.99,"category":"Electronics","keywords":["speaker","bluetooth","audio","portable"],"source":"Best Buy","url":"https://bestbuy.com"},
+    {"id":"13","name":"Generic Yoga Mat","price":19.99,"category":"Sports","keywords":["yoga","mat","exercise","fitness","gym"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"14","name":"TOPLUS Yoga Mat","price":25.99,"category":"Sports","keywords":["yoga","mat","exercise","fitness"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"15","name":"Kindle Paperwhite (Certified Refurbished)","price":89.99,"category":"Electronics","keywords":["kindle","ereader","books","reading","tablet"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"16","name":"Anker Soundcore Bluetooth Speaker","price":21.99,"category":"Electronics","keywords":["speaker","bluetooth","audio","portable","anker"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"17","name":"Amazon Basics Wireless Mouse","price":14.99,"category":"Electronics","keywords":["mouse","wireless","computer","laptop","peripheral"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"18","name":"Logitech M185 Wireless Mouse","price":19.99,"category":"Electronics","keywords":["mouse","wireless","logitech","computer","peripheral"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"19","name":"Amazon Basics Mechanical Keyboard","price":39.99,"category":"Electronics","keywords":["keyboard","mechanical","computer","typing","gaming"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"20","name":"Anker PowerCore 10000 Power Bank","price":25.99,"category":"Electronics","keywords":["power bank","charger","portable","battery","anker"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"21","name":"NYX Matte Liquid Lipstick","price":9.99,"category":"Beauty","keywords":["lipstick","lip","makeup","beauty","matte"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"22","name":"e.l.f. Mascara","price":10.00,"category":"Beauty","keywords":["mascara","lashes","makeup","beauty","eyes"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"23","name":"Wet n Wild Eyeshadow Palette","price":6.99,"category":"Beauty","keywords":["eyeshadow","palette","makeup","beauty","eyes"],"source":"Walmart","url":"https://walmart.com"},
+    {"id":"24","name":"CeraVe Moisturizing Cream","price":14.99,"category":"Beauty","keywords":["moisturizer","cream","skincare","beauty","lotion"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"25","name":"Neutrogena Hydro Boost Gel","price":18.99,"category":"Beauty","keywords":["moisturizer","gel","skincare","beauty","hydration"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"26","name":"Resistance Bands Set","price":12.99,"category":"Sports","keywords":["resistance","bands","workout","exercise","fitness","gym"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"27","name":"AmazonBasics Dumbbell Set","price":34.99,"category":"Sports","keywords":["dumbbells","weights","workout","exercise","fitness","gym"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"28","name":"Gaiam Foam Roller","price":19.99,"category":"Sports","keywords":["foam roller","recovery","massage","fitness","stretching"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"29","name":"Champion Men's Jersey T-Shirt","price":12.00,"category":"Sports","keywords":["tshirt","shirt","athletic","sportswear","champion"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"30","name":"Amazon Basics Jump Rope","price":7.99,"category":"Sports","keywords":["jump rope","cardio","workout","exercise","fitness"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"31","name":"AmazonBasics Desk Lamp","price":17.99,"category":"Home","keywords":["lamp","desk","light","home","office"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"32","name":"AmazonBasics Microwave","price":59.99,"category":"Home","keywords":["microwave","kitchen","appliance","home","cooking"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"33","name":"Utopia Bedding Pillow 2-Pack","price":19.99,"category":"Home","keywords":["pillow","bedding","sleep","home","bedroom"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"34","name":"AmazonBasics Hangers 30-Pack","price":8.99,"category":"Home","keywords":["hangers","closet","storage","home","organization"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"35","name":"Instant Pot Duo 3-Quart","price":69.99,"category":"Home","keywords":["instant pot","pressure cooker","kitchen","cooking","appliance"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"36","name":"Atomic Habits by James Clear","price":11.98,"category":"Books","keywords":["book","habits","self help","productivity","atomic"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"37","name":"The Psychology of Money","price":13.29,"category":"Books","keywords":["book","money","finance","investing","psychology"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"38","name":"Deep Work by Cal Newport","price":12.99,"category":"Books","keywords":["book","productivity","focus","work","deep work"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"39","name":"Kindle Basic (Refurbished)","price":49.99,"category":"Electronics","keywords":["kindle","ereader","books","reading"],"source":"Amazon","url":"https://amazon.com"},
+    {"id":"40","name":"Fruit of the Loom Women's T-Shirts 6-Pack","price":18.99,"category":"Fashion","keywords":["tshirt","shirt","clothing","fashion","apparel","women"],"source":"Amazon","url":"https://amazon.com"}
   ]
 }

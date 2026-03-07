@@ -6,6 +6,7 @@ AI-powered insights endpoints:
 """
 
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 from models.schemas import (
     ExtractedProduct, UserProfile, ChatRequest, ChatResponse,
     IntentClassification, WeeklySummary,
@@ -17,11 +18,6 @@ from datetime import datetime, timezone, timedelta
 router = APIRouter()
 
 
-class ClassifyRequest:
-    pass
-
-from pydantic import BaseModel
-
 class ClassifyRequest(BaseModel):
     product: ExtractedProduct
     profile: UserProfile
@@ -31,7 +27,6 @@ class ClassifyRequest(BaseModel):
 async def classify_purchase(req: ClassifyRequest):
     """
     Classifies a purchase as: need, want, impulse, emergency, gift, or duplicate.
-    Helps the frontend show context-aware messaging.
     """
     result = await classify_intent(req.product, req.profile)
     return IntentClassification(
@@ -51,7 +46,7 @@ async def chat(req: ChatRequest):
     return ChatResponse(answer=answer)
 
 
-@router.get("/weekly/{user_id}")
+@router.get("/weekly/{user_id}", response_model=WeeklySummary)
 async def weekly_summary(user_id: str):
     """
     Generates a Gemini-written weekly behavior summary from the user's spending logs.
@@ -61,7 +56,6 @@ async def weekly_summary(user_id: str):
     if not user_doc:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Get logs from the past 7 days
     week_ago = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
     logs_col = get_collection("spending_logs")
     cursor = logs_col.find({"user_id": user_id, "timestamp": {"$gte": week_ago}})

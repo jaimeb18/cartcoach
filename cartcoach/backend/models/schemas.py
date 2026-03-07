@@ -9,18 +9,18 @@ class RiskLevel(str, Enum):
     high = "High"
 
 
-class SavingsGoal(BaseModel):
-    name: str
-    target_amount: float
-    current_amount: float
-    target_date: Optional[str] = None
-
-
 class ToneMode(str, Enum):
     gentle = "gentle"
     direct = "direct"
     best_friend = "best_friend"
     professional = "professional"
+
+
+class SavingsGoal(BaseModel):
+    name: str
+    target_amount: float
+    current_amount: float
+    target_date: Optional[str] = None
 
 
 class UserProfile(BaseModel):
