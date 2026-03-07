@@ -1,9 +1,28 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
+import { copyFileSync, mkdirSync, readdirSync } from "fs";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: "copy-manifest-and-icons",
+      writeBundle() {
+        copyFileSync(
+          resolve(__dirname, "manifest.json"),
+          resolve(__dirname, "dist/manifest.json")
+        );
+        const iconsDir = resolve(__dirname, "src/icons");
+        const distIcons = resolve(__dirname, "dist/icons");
+        mkdirSync(distIcons, { recursive: true });
+        for (const file of readdirSync(iconsDir)) {
+          copyFileSync(resolve(iconsDir, file), resolve(distIcons, file));
+        }
+      },
+    },
+  ],
+  base: "./",
   build: {
     outDir: "dist",
     emptyOutDir: true,
@@ -14,16 +33,9 @@ export default defineConfig({
         dashboard: resolve(__dirname, "src/dashboard/index.html"),
         options: resolve(__dirname, "src/options/index.html"),
         background: resolve(__dirname, "src/background/background.ts"),
-        content: resolve(__dirname, "src/content/content.ts"),
       },
       output: {
-        entryFileNames: (chunk) => {
-          const pages = ["popup", "onboarding", "dashboard", "options"];
-          if (pages.includes(chunk.name)) {
-            return `${chunk.name}/[name].js`;
-          }
-          return `${chunk.name}/[name].js`;
-        },
+        entryFileNames: (chunk) => `${chunk.name}/${chunk.name}.js`,
         chunkFileNames: "chunks/[name]-[hash].js",
         assetFileNames: (asset) => {
           if (asset.name?.endsWith(".css")) {
