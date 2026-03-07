@@ -22,9 +22,10 @@ export default defineConfig({
       },
     },
   ],
+  root: resolve(__dirname, "src"),
   base: "./",
   build: {
-    outDir: "dist",
+    outDir: "../dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {
