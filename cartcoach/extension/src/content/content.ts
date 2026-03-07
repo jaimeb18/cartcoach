@@ -1,3 +1,4 @@
+import "../styles/global.css";
 import { isCheckoutPage, getCurrentSite, waitForCheckout } from "./detector";
 import { extractProductInfo } from "./extractor";
 import { injectModal } from "./injector";

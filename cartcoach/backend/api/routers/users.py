@@ -1,68 +1,64 @@
 """
-Part 4: User management routes.
+Part 4: User management routes — backed by MongoDB.
 """
 
-import uuid
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
-from db.database import get_db
-from db import models as db_models
+from fastapi import APIRouter, HTTPException
+from db.database import get_collection
+from db.models import user_doc, spending_log_doc
 from models.schemas import UserCreateRequest, UserProfile, SavingsGoal
 
 router = APIRouter()
 
 
 @router.post("/", response_model=UserProfile)
-def create_user(req: UserCreateRequest, db: Session = Depends(get_db)):
-    user = db_models.User(
-        id=str(uuid.uuid4()),
+async def create_user(req: UserCreateRequest):
+    users = get_collection("users")
+    doc = user_doc(
         monthly_budget=req.monthly_budget,
-        monthly_saved=0.0,
-        goal_name=req.savings_goal.name,
-        goal_target=req.savings_goal.target_amount,
-        goal_current=req.savings_goal.current_amount,
-        goal_target_date=req.savings_goal.target_date,
+        savings_goal=req.savings_goal.model_dump(),
         watched_categories=req.watched_categories,
         cooldown_hours=req.cooldown_hours,
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return _to_profile(user)
+    await users.insert_one(doc)
+    return _to_profile(doc)
 
 
 @router.get("/{user_id}", response_model=UserProfile)
-def get_user(user_id: str, db: Session = Depends(get_db)):
-    user = db.query(db_models.User).filter(db_models.User.id == user_id).first()
-    if not user:
+async def get_user(user_id: str):
+    users = get_collection("users")
+    doc = await users.find_one({"id": user_id})
+    if not doc:
         raise HTTPException(status_code=404, detail="User not found")
-    return _to_profile(user)
+    return _to_profile(doc)
 
 
 @router.put("/{user_id}", response_model=UserProfile)
-def update_user(user_id: str, req: UserCreateRequest, db: Session = Depends(get_db)):
-    user = db.query(db_models.User).filter(db_models.User.id == user_id).first()
-    if not user:
+async def update_user(user_id: str, req: UserCreateRequest):
+    users = get_collection("users")
+    update = {
+        "monthly_budget": req.monthly_budget,
+        "goal_name": req.savings_goal.name,
+        "goal_target": req.savings_goal.target_amount,
+        "goal_current": req.savings_goal.current_amount,
+        "goal_target_date": req.savings_goal.target_date,
+        "watched_categories": req.watched_categories,
+        "cooldown_hours": req.cooldown_hours,
+    }
+    result = await users.find_one_and_update(
+        {"id": user_id},
+        {"$set": update},
+        return_document=True,
+    )
+    if not result:
         raise HTTPException(status_code=404, detail="User not found")
-
-    user.monthly_budget = req.monthly_budget
-    user.goal_name = req.savings_goal.name
-    user.goal_target = req.savings_goal.target_amount
-    user.goal_current = req.savings_goal.current_amount
-    user.goal_target_date = req.savings_goal.target_date
-    user.watched_categories = req.watched_categories
-    user.cooldown_hours = req.cooldown_hours
-
-    db.commit()
-    db.refresh(user)
-    return _to_profile(user)
+    return _to_profile(result)
 
 
 @router.post("/{user_id}/log")
-def log_spending(user_id: str, body: dict, db: Session = Depends(get_db)):
-    """Log a purchase decision (purchased/skipped/saved_later/cooldown)."""
-    entry = db_models.SpendingLog(
+async def log_spending(user_id: str, body: dict):
+    """Log a purchase decision: purchased | skipped | saved_later | cooldown"""
+    logs = get_collection("spending_logs")
+    doc = spending_log_doc(
         user_id=user_id,
         product_name=body.get("product_name", "Unknown"),
         price=body.get("price", 0),
@@ -71,53 +67,41 @@ def log_spending(user_id: str, body: dict, db: Session = Depends(get_db)):
         action=body.get("action", "purchased"),
         risk_score=body.get("risk_score"),
     )
-    db.add(entry)
+    await logs.insert_one(doc)
 
-    # Update monthly_saved if purchase was made
+    # Track monthly spend
     if body.get("action") == "purchased":
-        user = db.query(db_models.User).filter(db_models.User.id == user_id).first()
-        if user:
-            user.monthly_saved = (user.monthly_saved or 0) + body.get("price", 0)
+        users = get_collection("users")
+        await users.update_one(
+            {"id": user_id},
+            {"$inc": {"monthly_spent": body.get("price", 0)}},
+        )
 
-    db.commit()
-    return {"status": "logged", "id": entry.id}
+    return {"status": "logged", "id": doc["id"]}
 
 
 @router.get("/{user_id}/history")
-def get_history(user_id: str, limit: int = 20, db: Session = Depends(get_db)):
-    logs = (
-        db.query(db_models.SpendingLog)
-        .filter(db_models.SpendingLog.user_id == user_id)
-        .order_by(db_models.SpendingLog.timestamp.desc())
-        .limit(limit)
-        .all()
-    )
-    return [
-        {
-            "id": l.id,
-            "product_name": l.product_name,
-            "price": l.price,
-            "category": l.category,
-            "site": l.site,
-            "action": l.action,
-            "risk_score": l.risk_score,
-            "timestamp": l.timestamp.isoformat(),
-        }
-        for l in logs
-    ]
+async def get_history(user_id: str, limit: int = 20):
+    logs = get_collection("spending_logs")
+    cursor = logs.find({"user_id": user_id}).sort("timestamp", -1).limit(limit)
+    results = []
+    async for doc in cursor:
+        doc.pop("_id", None)
+        results.append(doc)
+    return results
 
 
-def _to_profile(user: db_models.User) -> UserProfile:
+def _to_profile(doc: dict) -> UserProfile:
     return UserProfile(
-        id=user.id,
-        monthly_budget=user.monthly_budget,
-        monthly_saved=user.monthly_saved or 0.0,
+        id=doc["id"],
+        monthly_budget=doc["monthly_budget"],
+        monthly_saved=doc.get("monthly_spent", 0.0),
         savings_goal=SavingsGoal(
-            name=user.goal_name,
-            target_amount=user.goal_target,
-            current_amount=user.goal_current,
-            target_date=user.goal_target_date,
+            name=doc["goal_name"],
+            target_amount=doc["goal_target"],
+            current_amount=doc["goal_current"],
+            target_date=doc.get("goal_target_date"),
         ),
-        watched_categories=user.watched_categories or [],
-        cooldown_hours=user.cooldown_hours,
+        watched_categories=doc.get("watched_categories", []),
+        cooldown_hours=doc.get("cooldown_hours", 48),
     )

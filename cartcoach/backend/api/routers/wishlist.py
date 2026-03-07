@@ -1,93 +1,60 @@
 """
-Part 4: Wishlist / deferred purchase management.
+Part 4: Wishlist / deferred purchase management — backed by MongoDB.
 """
 
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
-from db.database import get_db
-from db import models as db_models
+from datetime import datetime, timezone
+from fastapi import APIRouter, HTTPException
+from db.database import get_collection
+from db.models import wishlist_doc
 from models.schemas import WishlistItemCreate
 
 router = APIRouter()
 
 
 @router.post("/")
-def add_to_wishlist(body: WishlistItemCreate, db: Session = Depends(get_db)):
-    remind_dt = None
-    if body.remind_at:
-        try:
-            remind_dt = datetime.fromisoformat(body.remind_at.replace("Z", "+00:00"))
-        except ValueError:
-            pass
-
-    item = db_models.WishlistItem(
+async def add_to_wishlist(body: WishlistItemCreate):
+    wishlist = get_collection("wishlist")
+    doc = wishlist_doc(
         user_id=body.user_id,
-        product_name=body.product.product_name,
-        price=body.product.price,
-        category=body.product.category,
-        site=body.product.site,
-        analysis_json=body.analysis.model_dump() if body.analysis else None,
-        remind_at=remind_dt,
+        product=body.product.model_dump(),
+        analysis=body.analysis.model_dump() if body.analysis else None,
+        remind_at=body.remind_at,
     )
-    db.add(item)
-    db.commit()
-    db.refresh(item)
-    return {"status": "saved", "id": item.id}
+    await wishlist.insert_one(doc)
+    return {"status": "saved", "id": doc["id"]}
 
 
 @router.get("/{user_id}")
-def get_wishlist(user_id: str, db: Session = Depends(get_db)):
-    items = (
-        db.query(db_models.WishlistItem)
-        .filter(db_models.WishlistItem.user_id == user_id)
-        .order_by(db_models.WishlistItem.saved_at.desc())
-        .all()
-    )
-    return [
-        {
-            "id": item.id,
-            "product_name": item.product_name,
-            "price": item.price,
-            "category": item.category,
-            "site": item.site,
-            "saved_at": item.saved_at.isoformat(),
-            "remind_at": item.remind_at.isoformat() if item.remind_at else None,
-            "analysis": item.analysis_json,
-        }
-        for item in items
-    ]
+async def get_wishlist(user_id: str):
+    wishlist = get_collection("wishlist")
+    cursor = wishlist.find({"user_id": user_id}).sort("saved_at", -1)
+    results = []
+    async for doc in cursor:
+        doc.pop("_id", None)
+        results.append(doc)
+    return results
 
 
 @router.delete("/{item_id}")
-def remove_from_wishlist(item_id: str, db: Session = Depends(get_db)):
-    item = db.query(db_models.WishlistItem).filter(db_models.WishlistItem.id == item_id).first()
-    if not item:
+async def remove_from_wishlist(item_id: str):
+    wishlist = get_collection("wishlist")
+    result = await wishlist.delete_one({"id": item_id})
+    if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Item not found")
-    db.delete(item)
-    db.commit()
     return {"status": "removed"}
 
 
 @router.get("/due-reminders/{user_id}")
-def get_due_reminders(user_id: str, db: Session = Depends(get_db)):
+async def get_due_reminders(user_id: str):
     """Returns wishlist items whose reminder time has passed."""
-    now = datetime.utcnow()
-    items = (
-        db.query(db_models.WishlistItem)
-        .filter(
-            db_models.WishlistItem.user_id == user_id,
-            db_models.WishlistItem.remind_at <= now,
-        )
-        .all()
-    )
-    return [
-        {
-            "id": item.id,
-            "product_name": item.product_name,
-            "price": item.price,
-            "remind_at": item.remind_at.isoformat() if item.remind_at else None,
-        }
-        for item in items
-    ]
+    now = datetime.now(timezone.utc).isoformat()
+    wishlist = get_collection("wishlist")
+    cursor = wishlist.find({
+        "user_id": user_id,
+        "remind_at": {"$lte": now, "$ne": None},
+    })
+    results = []
+    async for doc in cursor:
+        doc.pop("_id", None)
+        results.append(doc)
+    return results

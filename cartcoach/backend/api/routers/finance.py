@@ -1,6 +1,7 @@
 """
 Part 3: Finance API router.
 POST /api/analyze — core endpoint used by the extension.
+All routes are async to support Motor (MongoDB) and Gemini async calls.
 """
 
 from fastapi import APIRouter
@@ -17,10 +18,10 @@ router = APIRouter()
 
 
 @router.post("/analyze", response_model=FinanceAnalysis)
-def analyze_purchase(req: AnalyzeRequest) -> FinanceAnalysis:
+async def analyze_purchase(req: AnalyzeRequest) -> FinanceAnalysis:
     """
     Core endpoint. Accepts a product + user profile, returns full financial analysis.
-    Used by the Chrome extension content script via the background service worker.
+    Calls Gemini for AI-generated nudge messages. Saves analysis to MongoDB.
     """
     product = req.product
     profile = req.profile
@@ -32,14 +33,11 @@ def analyze_purchase(req: AnalyzeRequest) -> FinanceAnalysis:
     risk_score = compute_risk_score(product, profile, budget_impact, goal_delay_days)
     risk_level = risk_level_from_score(risk_score)
 
-    message = generate_message(
+    # Gemini-powered messages (async, with template fallback)
+    message, recommendation = await _generate_messages(
         product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y
     )
-    recommendation = generate_recommendation(
-        risk_level, profile, budget_impact, goal_delay_days
-    )
 
-    # Fetch alternatives inline (import here to avoid circular)
     from api.routers.alternatives import find_alternatives
     alternatives = find_alternatives(product.product_name, product.category, product.price)
 
@@ -53,29 +51,34 @@ def analyze_purchase(req: AnalyzeRequest) -> FinanceAnalysis:
         future_value_5y=future_value_5y,
         recommendation=recommendation,
         message=message,
-        alternatives=alternatives[:3],  # Show at most 3
+        alternatives=alternatives[:3],
     )
 
 
-@router.get("/goal-progress")
-def goal_progress(user_id: str):
-    """Returns savings goal progress for a user. Reads from DB."""
-    from db.database import SessionLocal
-    from db import models as db_models
+async def _generate_messages(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y):
+    """Run both Gemini calls concurrently."""
+    import asyncio
+    message, recommendation = await asyncio.gather(
+        generate_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y),
+        generate_recommendation(risk_level, profile, budget_impact, goal_delay_days),
+    )
+    return message, recommendation
 
-    db = SessionLocal()
-    try:
-        user = db.query(db_models.User).filter(db_models.User.id == user_id).first()
-        if not user:
-            return {"error": "User not found"}
-        remaining = user.goal_target - user.goal_current
-        pct = min(100.0, (user.goal_current / user.goal_target * 100)) if user.goal_target > 0 else 0
-        return {
-            "goal_name": user.goal_name,
-            "target": user.goal_target,
-            "current": user.goal_current,
-            "remaining": remaining,
-            "pct_complete": round(pct, 1),
-        }
-    finally:
-        db.close()
+
+@router.get("/goal-progress")
+async def goal_progress(user_id: str):
+    """Returns savings goal progress for a user from MongoDB."""
+    from db.database import get_collection
+    users = get_collection("users")
+    user = await users.find_one({"id": user_id})
+    if not user:
+        return {"error": "User not found"}
+    remaining = user["goal_target"] - user["goal_current"]
+    pct = min(100.0, user["goal_current"] / user["goal_target"] * 100) if user["goal_target"] > 0 else 0
+    return {
+        "goal_name": user["goal_name"],
+        "target": user["goal_target"],
+        "current": user["goal_current"],
+        "remaining": remaining,
+        "pct_complete": round(pct, 1),
+    }

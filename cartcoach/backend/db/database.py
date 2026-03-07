@@ -1,32 +1,34 @@
 """
-Part 4: Database setup.
-Uses SQLite for local dev (zero-config). Swap DATABASE_URL for Postgres in production.
+Part 4: MongoDB connection using Motor (async driver).
+Collections: users, spending_logs, wishlist
 """
 
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
 
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cartcoach.db")
+load_dotenv()
 
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+MONGODB_DB = os.getenv("MONGODB_DB", "cartcoach")
 
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-class Base(DeclarativeBase):
-    pass
+client: AsyncIOMotorClient = None
 
 
-def init_db():
-    from db import models  # noqa: F401 — registers all models
-    Base.metadata.create_all(bind=engine)
+async def connect_db():
+    global client
+    client = AsyncIOMotorClient(MONGODB_URL)
+
+
+async def close_db():
+    global client
+    if client:
+        client.close()
 
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    return client[MONGODB_DB]
+
+
+def get_collection(name: str):
+    return client[MONGODB_DB][name]

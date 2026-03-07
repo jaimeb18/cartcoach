@@ -2,14 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from db.database import init_db
+from db.database import connect_db, close_db
 from api.routers import users, finance, alternatives, wishlist
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
+    await connect_db()
     yield
+    await close_db()
 
 
 app = FastAPI(
@@ -34,5 +35,11 @@ app.include_router(wishlist.router, prefix="/api/wishlist", tags=["wishlist"])
 
 
 @app.get("/health")
-def health():
-    return {"status": "ok", "service": "CartCoach API"}
+async def health():
+    from db.database import get_db
+    try:
+        await get_db().command("ping")
+        mongo_status = "connected"
+    except Exception:
+        mongo_status = "unreachable"
+    return {"status": "ok", "service": "CartCoach API", "mongodb": mongo_status}
