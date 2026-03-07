@@ -4,8 +4,6 @@ import { resolve } from "path";
 import { copyFileSync, mkdirSync, readdirSync } from "fs";
 
 export default defineConfig({
-  root: "src",
-  base: "./",
   plugins: [
     react(),
     {
@@ -24,8 +22,9 @@ export default defineConfig({
       },
     },
   ],
+  base: "./",
   build: {
-    outDir: "../dist",
+    outDir: "dist",
     emptyOutDir: true,
     rollupOptions: {
       input: {
@@ -34,7 +33,6 @@ export default defineConfig({
         dashboard: resolve(__dirname, "src/dashboard/index.html"),
         options: resolve(__dirname, "src/options/index.html"),
         background: resolve(__dirname, "src/background/background.ts"),
-        content: resolve(__dirname, "src/content/content.ts"),
       },
       output: {
         entryFileNames: (chunk) => `${chunk.name}/${chunk.name}.js`,
