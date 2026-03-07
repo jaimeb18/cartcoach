@@ -12,7 +12,7 @@ router = APIRouter()
 
 # Load catalog once at startup
 _CATALOG_PATH = os.path.join(
-    os.path.dirname(__file__), "../../../../mock-data/alternatives.json"
+    os.path.dirname(__file__), "../../../mock-data/alternatives.json"
 )
 
 try:
