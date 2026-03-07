@@ -18,7 +18,6 @@ async def create_user(req: UserCreateRequest):
         savings_goal=req.savings_goal.model_dump(),
         watched_categories=req.watched_categories,
         cooldown_hours=req.cooldown_hours,
-        tone_mode=req.tone_mode.value,
     )
     await users.insert_one(doc)
     return _to_profile(doc)

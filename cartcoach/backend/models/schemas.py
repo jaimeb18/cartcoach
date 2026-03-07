@@ -16,13 +16,6 @@ class SavingsGoal(BaseModel):
     target_date: Optional[str] = None
 
 
-class ToneMode(str, Enum):
-    gentle = "gentle"
-    direct = "direct"
-    best_friend = "best_friend"
-    professional = "professional"
-
-
 class UserProfile(BaseModel):
     id: str
     monthly_budget: float
@@ -30,7 +23,6 @@ class UserProfile(BaseModel):
     savings_goal: SavingsGoal
     watched_categories: List[str] = []
     cooldown_hours: int = 48
-    tone_mode: ToneMode = ToneMode.gentle
 
 
 class ExtractedProduct(BaseModel):
@@ -62,32 +54,6 @@ class FinanceAnalysis(BaseModel):
     alternatives: List[Alternative] = []
 
 
-class IntentClassification(BaseModel):
-    intent: str  # need | want | impulse | emergency | gift | duplicate
-    confidence: str  # high | medium | low
-    explanation: str
-
-
-class WeeklySummary(BaseModel):
-    week_start: str
-    total_spent: float
-    purchases_made: int
-    purchases_skipped: int
-    amount_saved: float
-    top_category: str
-    insight: str
-
-
-class ChatRequest(BaseModel):
-    question: str
-    product: Optional[ExtractedProduct] = None
-    profile: UserProfile
-
-
-class ChatResponse(BaseModel):
-    answer: str
-
-
 class AnalyzeRequest(BaseModel):
     product: ExtractedProduct
     profile: UserProfile
@@ -98,7 +64,6 @@ class UserCreateRequest(BaseModel):
     savings_goal: SavingsGoal
     watched_categories: List[str] = []
     cooldown_hours: int = 48
-    tone_mode: ToneMode = ToneMode.gentle
 
 
 class WishlistItemCreate(BaseModel):
