@@ -4,6 +4,7 @@ import BudgetCard from "../components/BudgetCard";
 import GoalProgress from "../components/GoalProgress";
 import { STORAGE_KEYS } from "@shared/constants";
 import type { UserProfile, SpendingHistory, WishlistItem } from "@shared/types";
+import LedgerTable from "../components/LedgerTable";
 
 type Tab = "overview" | "history" | "wishlist";
 
@@ -13,6 +14,7 @@ export default function Dashboard() {
   const [history, setHistory] = useState<SpendingHistory[]>([]);
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [tab, setTab] = useState<Tab>("overview");
+  const [showLedger, setShowLedger] = useState(false);
 
   useEffect(() => {
     getValue<UserProfile>(STORAGE_KEYS.USER_PROFILE).then((p) => p && setProfile(p));
@@ -42,12 +44,20 @@ export default function Dashboard() {
               <p className="text-xs text-gray-400">Your financial wellness dashboard</p>
             </div>
           </div>
-          <button
-            onClick={() => chrome.runtime.openOptionsPage()}
-            className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
-          >
-            ⚙️ Settings
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowLedger(true)}
+              className="text-sm px-4 py-1.5 bg-green-50 text-green-700 font-medium rounded-lg hover:bg-green-100 transition-colors"
+            >
+              Open Ledger
+            </button>
+            <button
+              onClick={() => chrome.runtime.openOptionsPage()}
+              className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1"
+            >
+              ⚙️ Settings
+            </button>
+          </div>
         </div>
       </header>
 
@@ -85,11 +95,10 @@ export default function Dashboard() {
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`flex-1 py-3 text-sm font-medium capitalize transition-colors ${
-                  tab === t
-                    ? "text-green-600 border-b-2 border-green-500"
-                    : "text-gray-500 hover:text-gray-700"
-                }`}
+                className={`flex-1 py-3 text-sm font-medium capitalize transition-colors ${tab === t
+                  ? "text-green-600 border-b-2 border-green-500"
+                  : "text-gray-500 hover:text-gray-700"
+                  }`}
               >
                 {t}
                 {t === "wishlist" && wishlist.length > 0 && (
@@ -127,7 +136,7 @@ export default function Dashboard() {
                               100,
                               (amount /
                                 Math.max(...Object.values({ [cat]: amount }))) *
-                                100
+                              100
                             )}%`,
                           }}
                         />
@@ -167,13 +176,12 @@ export default function Dashboard() {
                         ${item.product.price}
                       </p>
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          item.action === "skipped"
-                            ? "bg-green-100 text-green-700"
-                            : item.action === "purchased"
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.action === "skipped"
+                          ? "bg-green-100 text-green-700"
+                          : item.action === "purchased"
                             ? "bg-red-100 text-red-600"
                             : "bg-yellow-100 text-yellow-700"
-                        }`}
+                          }`}
                       >
                         {item.action === "saved_later" ? "saved" : item.action}
                       </span>
@@ -221,6 +229,7 @@ export default function Dashboard() {
                 )}
               </div>
             )}
+
           </div>
         </div>
 
@@ -229,6 +238,8 @@ export default function Dashboard() {
           advice. Investment projections use a 7% annual return estimate.
         </p>
       </div>
+
+      {showLedger && <LedgerTable onClose={() => setShowLedger(false)} />}
     </div>
   );
 }
