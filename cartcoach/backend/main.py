@@ -1,0 +1,38 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+
+from db.database import init_db
+from api.routers import users, finance, alternatives, wishlist
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(
+    title="CartCoach API",
+    description="Real-time financial nudges at checkout.",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Restrict in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(users.router, prefix="/api/users", tags=["users"])
+app.include_router(finance.router, prefix="/api", tags=["finance"])
+app.include_router(alternatives.router, prefix="/api/alternatives", tags=["alternatives"])
+app.include_router(wishlist.router, prefix="/api/wishlist", tags=["wishlist"])
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "CartCoach API"}

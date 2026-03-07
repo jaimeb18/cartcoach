@@ -1,0 +1,30 @@
+{
+  "users": [
+    {
+      "id": "demo-user-1",
+      "monthlyBudget": 500,
+      "monthlySaved": 220,
+      "savingsGoal": {
+        "name": "Summer Travel Fund",
+        "targetAmount": 2000,
+        "currentAmount": 850,
+        "targetDate": "2026-07-01"
+      },
+      "watchedCategories": ["Fashion", "Beauty", "Entertainment"],
+      "cooldownHours": 48
+    },
+    {
+      "id": "demo-user-2",
+      "monthlyBudget": 300,
+      "monthlySaved": 80,
+      "savingsGoal": {
+        "name": "Emergency Fund",
+        "targetAmount": 5000,
+        "currentAmount": 1200,
+        "targetDate": "2026-12-31"
+      },
+      "watchedCategories": ["Electronics", "Fashion"],
+      "cooldownHours": 24
+    }
+  ]
+}

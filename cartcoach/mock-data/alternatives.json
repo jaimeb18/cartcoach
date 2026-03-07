@@ -1,0 +1,139 @@
+{
+  "catalog": [
+    {
+      "id": "1",
+      "name": "Anker Wireless Headphones",
+      "price": 49.99,
+      "category": "Electronics",
+      "keywords": ["headphones", "wireless", "audio", "earbuds"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "2",
+      "name": "Sony ZX110 Headphones",
+      "price": 19.99,
+      "category": "Electronics",
+      "keywords": ["headphones", "audio", "sony"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "3",
+      "name": "Mpow Bluetooth Headphones",
+      "price": 29.99,
+      "category": "Electronics",
+      "keywords": ["headphones", "bluetooth", "wireless"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "4",
+      "name": "Amazon Basics USB-C Cable",
+      "price": 8.99,
+      "category": "Electronics",
+      "keywords": ["cable", "usb", "charger", "charging"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "5",
+      "name": "Puma Running Shoes",
+      "price": 64.99,
+      "category": "Fashion",
+      "keywords": ["shoes", "running", "sneakers", "athletic"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "6",
+      "name": "New Balance 411 Running Shoes",
+      "price": 54.99,
+      "category": "Fashion",
+      "keywords": ["shoes", "running", "sneakers", "athletic"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "7",
+      "name": "Saucony Cohesion Running Shoes",
+      "price": 59.95,
+      "category": "Fashion",
+      "keywords": ["shoes", "running", "sneakers", "saucony"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "8",
+      "name": "e.l.f. Foundation",
+      "price": 12.99,
+      "category": "Beauty",
+      "keywords": ["foundation", "makeup", "beauty", "cosmetics"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "9",
+      "name": "Maybelline Fit Me Foundation",
+      "price": 8.97,
+      "category": "Beauty",
+      "keywords": ["foundation", "maybelline", "makeup", "beauty"],
+      "source": "Walmart",
+      "url": "https://walmart.com"
+    },
+    {
+      "id": "10",
+      "name": "AmazonBasics Laptop Backpack",
+      "price": 27.99,
+      "category": "Fashion",
+      "keywords": ["backpack", "bag", "laptop", "school"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "11",
+      "name": "Hanes Men's T-Shirt 6-Pack",
+      "price": 22.00,
+      "category": "Fashion",
+      "keywords": ["tshirt", "shirt", "clothing", "fashion", "apparel"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "12",
+      "name": "Insignia Bluetooth Speaker",
+      "price": 29.99,
+      "category": "Electronics",
+      "keywords": ["speaker", "bluetooth", "audio", "portable"],
+      "source": "Best Buy",
+      "url": "https://bestbuy.com"
+    },
+    {
+      "id": "13",
+      "name": "Generic Yoga Mat",
+      "price": 19.99,
+      "category": "Sports",
+      "keywords": ["yoga", "mat", "exercise", "fitness", "gym"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "14",
+      "name": "TOPLUS Yoga Mat",
+      "price": 25.99,
+      "category": "Sports",
+      "keywords": ["yoga", "mat", "exercise", "fitness"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    },
+    {
+      "id": "15",
+      "name": "Kindle Paperwhite (Certified Refurbished)",
+      "price": 89.99,
+      "category": "Electronics",
+      "keywords": ["kindle", "ereader", "books", "reading", "tablet"],
+      "source": "Amazon",
+      "url": "https://amazon.com"
+    }
+  ]
+}
