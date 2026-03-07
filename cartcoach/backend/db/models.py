@@ -21,6 +21,7 @@ def user_doc(
     watched_categories: list,
     cooldown_hours: int,
     user_id: str = None,
+    tone_mode: str = "gentle",
 ) -> dict:
     return {
         "id": user_id or new_id(),
@@ -32,6 +33,7 @@ def user_doc(
         "goal_target_date": savings_goal.get("target_date"),
         "watched_categories": watched_categories,
         "cooldown_hours": cooldown_hours,
+        "tone_mode": tone_mode,
         "created_at": now_utc().isoformat(),
     }
 
