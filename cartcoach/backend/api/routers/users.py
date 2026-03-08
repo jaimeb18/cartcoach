@@ -3,8 +3,9 @@ Part 4: User management routes — backed by MongoDB.
 """
 
 from fastapi import APIRouter, HTTPException
-from db.database import get_collection
-from db.models import user_doc, spending_log_doc
+from datetime import datetime
+from db.database import get_collection, get_ledger_collection, ensure_ledger_indexes
+from db.models import user_doc, spending_log_doc, ledger_entry_doc
 from models.schemas import UserCreateRequest, UserProfile, SavingsGoal
 
 router = APIRouter()
@@ -70,13 +71,42 @@ async def log_spending(user_id: str, body: dict):
     )
     await logs.insert_one(doc)
 
+    action = body.get("action")
+
     # Track monthly spend
-    if body.get("action") == "purchased":
+    if action == "purchased":
         users = get_collection("users")
         await users.update_one(
             {"id": user_id},
             {"$inc": {"monthly_spent": body.get("price", 0)}},
         )
+
+    # Auto-sync to ledger
+    if action in ("purchased", "saved_later"):
+        ts = datetime.fromisoformat(doc["timestamp"])
+        year, month = ts.year, ts.month
+        await ensure_ledger_indexes(year, month)
+        collection = get_ledger_collection(user_id, year, month)
+        if action == "purchased":
+            description = body.get("product_name", "Unknown")
+            category = body.get("category", "Other")
+            inflow, outflow = None, body.get("price", 0)
+        else:  # saved_later
+            description = "Item Skipped - Cash Transfer"
+            category = "Savings"
+            inflow, outflow = None, body.get("price", 0)
+        entry = ledger_entry_doc(
+            user_id=user_id,
+            date=ts.strftime("%Y-%m-%d"),
+            description=description,
+            category=category,
+            inflow=inflow,
+            outflow=outflow,
+            notes=body.get("site", ""),
+            entry_id=f"log_{doc['id']}",
+            source="auto",
+        )
+        await collection.update_one({"id": entry["id"]}, {"$set": entry}, upsert=True)
 
     return {"status": "logged", "id": doc["id"]}
 

@@ -32,3 +32,18 @@ def get_db():
 
 def get_collection(name: str):
     return client[MONGODB_DB][name]
+
+
+# Ledger collection helpers
+def get_ledger_collection(user_id: str, year: int, month: int):
+    db = get_db()
+    collection_name = f"ledger_{year}_{month}"
+    return db[collection_name]
+
+async def ensure_ledger_indexes(year: int, month: int):
+    db = get_db()
+    collection_name = f"ledger_{year}_{month}"
+    col = db[collection_name]
+    await col.create_index([("user_id", 1), ("date", 1)])
+    await col.create_index([("id", 1)], unique=True)
+    await col.create_index([("user_id", 1), ("created_at", -1)])

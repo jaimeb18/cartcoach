@@ -62,6 +62,27 @@ export interface SpendingHistory {
   timestamp: string;
 }
 
+export interface LedgerEntry {
+  id: string;
+  date: string;
+  description: string;
+  category: string;
+  inflow: number | null;
+  outflow: number | null;
+  notes: string;
+  created_at?: string;
+  updated_at?: string;
+  sync_status?: string;
+  source?: string;
+}
+
+export interface LedgerMonth {
+  year: number;
+  month: number;
+  entry_count: number;
+  balance: number;
+}
+
 // Chrome extension message types
 export type MessageType =
   | { type: "PRODUCT_DETECTED"; payload: ExtractedProduct }

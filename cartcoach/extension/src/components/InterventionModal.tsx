@@ -138,7 +138,7 @@ export default function InterventionModal({
             />
 
             {/* Impact stats */}
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, width: "100%", textAlign: "center" }}>
               <div style={{ background: "#fdf2f8", borderRadius: 14, padding: "10px 8px" }}>
                 <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>Budget impact</p>
                 <p style={{ fontSize: 13, fontWeight: 700, color: "#374151", marginTop: 4 }}>{analysis.budgetImpact}</p>
@@ -180,11 +180,11 @@ export default function InterventionModal({
             )}
 
             {/* Actions */}
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, width: "100%" }}>
                 <button
                   onClick={() => setShowSkipFollowUp(true)}
-                  style={{ background: "#e8a0bc", color: "#fff", fontWeight: 700, padding: "11px 0", borderRadius: 14, border: "none", cursor: "pointer", fontSize: 14 }}
+                  style={{ background: "#e8a0bc", color: "#fff", fontWeight: 700, padding: "11px 0", borderRadius: 14, border: "none", cursor: "pointer", fontSize: 14, width: "100%" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "#d4789e")}
                   onMouseLeave={e => (e.currentTarget.style.background = "#e8a0bc")}
                 >
@@ -192,7 +192,7 @@ export default function InterventionModal({
                 </button>
                 <button
                   onClick={onSaveLater}
-                  style={{ background: "#fdf2f8", color: "#c0506a", fontWeight: 700, padding: "11px 0", borderRadius: 14, border: "1.5px solid #f9c8d8", cursor: "pointer", fontSize: 14 }}
+                  style={{ background: "#fdf2f8", color: "#c0506a", fontWeight: 700, padding: "11px 0", borderRadius: 14, border: "1.5px solid #f9c8d8", cursor: "pointer", fontSize: 14, width: "100%" }}
                   onMouseEnter={e => (e.currentTarget.style.background = "#fce7f3")}
                   onMouseLeave={e => (e.currentTarget.style.background = "#fdf2f8")}
                 >

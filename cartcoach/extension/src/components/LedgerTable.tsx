@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLedger } from "../hooks/useLedger";
 import type { SpendingHistory } from "@shared/types";
 
 export type LedgerRow = {
@@ -21,16 +22,15 @@ function historyToRow(item: SpendingHistory): LedgerRow {
     const d = new Date(item.timestamp);
     const date = `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
     const isPurchase = item.action === "purchased";
-    const isSaved = item.action === "saved_later";
     return {
         id: item.id,
         date,
         description: item.product.productName,
-        category: isSaved ? "Savings" : item.product.category,
-        inflow: "",
-        outflow: (isPurchase || isSaved) ? item.product.price.toString() : "",
+        category: item.product.category,
+        inflow: isPurchase ? "" : item.product.price.toString(),
+        outflow: isPurchase ? item.product.price.toString() : "",
         balance: "",
-        notes: isSaved ? "transferred to savings" : item.product.site,
+        notes: item.product.site,
     };
 }
 
@@ -41,59 +41,110 @@ const CATEGORIES = [
     "Grocery", "Income", "Transportation", "Utilities", "Housing", "Discretionary Spending", "Savings"
 ];
 
-export default function LedgerTable({ history = [] }: { history?: SpendingHistory[] }) {
-    const [currentDate, setCurrentDate] = useState(new Date());
+export default function LedgerTable({ history = [], userId = null, onDeleteHistory }: { history?: SpendingHistory[], userId?: string | null, onDeleteHistory?: (id: string) => void }) {
+    const { entries, setEntries, loading, error, currentMonth, setCurrentMonth, loadMonth, saveMonth, deleteEntry, syncHistoryToLedger } = useLedger(userId);
     const [editingCell, setEditingCell] = useState<{ id: string, field: keyof LedgerRow } | null>(null);
     const [suggestion, setSuggestion] = useState<string>("");
-    const prevDateRef = useRef(currentDate);
+    const prevDateRef = useRef(currentMonth);
+    const saveTimeoutRef = useRef<number | null>(null);
+    const isLoadingRows = useRef(false);
 
-    const getDateString = (date: Date) => `${MONTHS[date.getMonth()]} , ${date.getFullYear()}`;
+    // Helper to format currentMonth as 'Month Day, Year'
+    function getDateString(date: Date) {
+        return `${MONTHS[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+    }
 
-    const [rows, setRows] = useState<LedgerRow[]>(() => [
-        ...history.filter(h => h.action !== "skipped").map(historyToRow),
-        ...Array.from({ length: 5 }).map((_, i) => ({
-            id: `empty-${i}`, date: getDateString(new Date()), description: "", category: "", inflow: "", outflow: "", balance: "", notes: ""
-        })),
-    ]);
-
-    // Sync dates when calendar month/year changes
-    useEffect(() => {
-        const prevDate = prevDateRef.current;
-        if (prevDate.getMonth() !== currentDate.getMonth() || prevDate.getFullYear() !== currentDate.getFullYear()) {
-            const oldMonth = MONTHS[prevDate.getMonth()];
-            const oldYear = prevDate.getFullYear().toString();
-            const newMonth = MONTHS[currentDate.getMonth()];
-            const newYear = currentDate.getFullYear().toString();
-
-            setRows(prevRows => prevRows.map(row => {
-                let newDate = row.date;
-                if (newDate.includes(oldMonth)) {
-                    newDate = newDate.replace(oldMonth, newMonth);
-                }
-                if (newDate.includes(oldYear)) {
-                    newDate = newDate.replace(oldYear, newYear);
-                }
-                return { ...row, date: newDate };
-            }));
+    function normalizeDate(raw: string): string {
+        if (!raw) return "";
+        // Already "Month Day, Year" format
+        if (/^[A-Za-z]/.test(raw)) return raw;
+        // ISO format YYYY-MM-DD
+        const [year, month, day] = raw.split("-").map(Number);
+        if (year && month && day) {
+            return `${MONTHS[month - 1]} ${day}, ${year}`;
         }
-        prevDateRef.current = currentDate;
-    }, [currentDate]);
+        return raw;
+    }
+
+    // Convert backend entries to LedgerRow
+    function entryToRow(entry: any): LedgerRow {
+        return {
+            id: entry.id,
+            date: normalizeDate(entry.date),
+            description: entry.description,
+            category: entry.category,
+            inflow: entry.inflow?.toString() ?? "",
+            outflow: entry.outflow?.toString() ?? "",
+            balance: "",
+            notes: entry.notes ?? "",
+        };
+    }
+    function rowToEntry(row: LedgerRow) {
+        return {
+            id: row.id,
+            date: row.date,
+            description: row.description,
+            category: row.category,
+            inflow: row.inflow ? parseFloat(row.inflow) : null,
+            outflow: row.outflow ? parseFloat(row.outflow) : null,
+            notes: row.notes,
+        };
+    }
+
+    // State for UI rows
+    const [rows, setRows] = useState<LedgerRow[]>([]);
+
+    // Sync Chrome history to ledger once on mount
+    useEffect(() => {
+        if (history.length > 0) syncHistoryToLedger(history);
+    }, []);
+
+    // Load month when currentMonth changes
+    useEffect(() => {
+        const year = currentMonth.getFullYear();
+        const month = currentMonth.getMonth() + 1;
+        loadMonth(year, month);
+    }, [currentMonth, loadMonth]);
+
+    // Convert loaded entries to rows
+    useEffect(() => {
+        isLoadingRows.current = true;
+        setRows(entries.map(entryToRow));
+    }, [entries]);
+
+    // Debounced save when rows change
+    useEffect(() => {
+        if (isLoadingRows.current) {
+            isLoadingRows.current = false;
+            return;
+        }
+        if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = setTimeout(() => {
+            const entriesToSave = rows.map(rowToEntry);
+            saveMonth(entriesToSave);
+        }, 1000);
+        return () => {
+            if (saveTimeoutRef.current !== null) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
+    }, [rows, saveMonth]);
 
     // Calendar Navigation Handlers
     const handlePrevMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
     };
 
     const handleNextMonth = () => {
-        setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
     };
 
     const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setCurrentDate(new Date(currentDate.getFullYear(), parseInt(e.target.value), 1));
+        setCurrentMonth(new Date(currentMonth.getFullYear(), parseInt(e.target.value), 1));
     };
 
     const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setCurrentDate(new Date(parseInt(e.target.value), currentDate.getMonth(), 1));
+        setCurrentMonth(new Date(parseInt(e.target.value), currentMonth.getMonth(), 1));
     };
 
     // Compute running balances for all rows
@@ -196,15 +247,26 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
     };
 
     const addRow = () => {
-        const dateString = getDateString(currentDate);
+        const dateString = getDateString(currentMonth);
         setRows([...rows, {
             id: Date.now().toString() + Math.random().toString(),
             date: dateString, description: "", category: "", inflow: "", outflow: "", balance: "", notes: ""
         }]);
     };
 
+    // Debug overlay
+    const debugInfo = (
+        <div style={{ position: "absolute", top: 8, right: 16, zIndex: 1000, background: "rgba(0,0,0,0.7)", color: "#fff", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontFamily: "monospace" }}>
+            <div>userId: {userId || "(none)"}</div>
+            <div>loading: {String(loading)}</div>
+            <div>error: {error ? error.toString() : "none"}</div>
+            <div>rows: {rows.length}</div>
+        </div>
+    );
+
     return (
-        <div className="flex flex-col h-full overflow-hidden bg-white">
+        <div className="flex flex-col h-full overflow-hidden bg-white" style={{ position: "relative" }}>
+            {debugInfo}
             {/* Header and Calendar Controls */}
             <div className="flex justify-between items-center p-6 border-b border-gray-100 shrink-0">
                 <div className="flex items-center gap-6">
@@ -221,7 +283,7 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
 
                         <div className="flex items-center gap-1">
                             <select
-                                value={currentDate.getMonth()}
+                                value={currentMonth.getMonth()}
                                 onChange={handleMonthChange}
                                 className="bg-transparent text-sm font-medium text-gray-700 outline-none cursor-pointer appearance-none hover:bg-gray-200 p-1 rounded transition-colors"
                             >
@@ -231,7 +293,7 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
                             </select>
 
                             <select
-                                value={currentDate.getFullYear()}
+                                value={currentMonth.getFullYear()}
                                 onChange={handleYearChange}
                                 className="bg-transparent text-sm font-medium text-gray-700 outline-none cursor-pointer appearance-none hover:bg-gray-200 p-1 rounded transition-colors"
                             >
@@ -263,6 +325,7 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
                                 <th className="px-4 py-3 font-medium w-[12%]">Outflow</th>
                                 <th className="px-4 py-3 font-medium w-[12%]">Balance</th>
                                 <th className="px-4 py-3 font-medium w-[12%]">Notes</th>
+                                <th className="px-2 py-3 font-medium w-[4%]"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -312,7 +375,7 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
                                                         </>
                                                     ) : row[field] ? (
                                                         (field === 'inflow' || field === 'outflow' || field === 'balance') ? (
-                                                            `$${parseFloat(row[field] || '0').toFixed(2)}`
+                                                            field === 'outflow' && row[field] ? `-$${parseFloat(row[field]).toFixed(2)}` : `$${parseFloat(row[field] || '0').toFixed(2)}`
                                                         ) : row[field]
                                                     ) : (
                                                         <span className="text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity select-none">--</span>
@@ -321,6 +384,21 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
                                             )}
                                         </td>
                                     ))}
+                                    <td className="px-2 py-3">
+                                        <button
+                                            onClick={() => {
+                                                deleteEntry(row.id);
+                                                setRows(rows.filter(r => r.id !== row.id));
+                                                if (row.id.startsWith("log_")) {
+                                                    onDeleteHistory?.(row.id.slice(4));
+                                                }
+                                            }}
+                                            className="text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg p-1 transition-colors"
+                                            title="Delete row"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

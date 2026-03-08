@@ -7,6 +7,7 @@ import { STORAGE_KEYS } from "@shared/constants";
 import type { UserProfile, SpendingHistory, WishlistItem } from "@shared/types";
 import boxClosed from "./box-closed.png";
 import boxOpen from "./box-open.png";
+import { getOrCreateUserId } from "../shared/userId";
 
 type Tab = "overview" | "history" | "wishlist" | "insights" | "ledger";
 
@@ -23,6 +24,7 @@ const ACTION_CONFIG: Record<string, { label: string; dot: string; bg: string; te
 const PROJECTION_YEARS = [0, 1, 3, 5, 10, 20] as const;
 const CHART_W = 360;
 const CHART_H = 100;
+const CHART_TOP_PAD = 18;
 const BAR_W = 36;
 
 const NAV_ITEMS: { id: Tab; label: string; icon: JSX.Element }[] = [
@@ -91,6 +93,8 @@ const [showChat, setShowChat] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatSending, setChatSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const userId = getOrCreateUserId();
 
   useEffect(() => {
     getValue<UserProfile>(STORAGE_KEYS.USER_PROFILE).then((p) => p && setProfile(p));
@@ -329,7 +333,7 @@ const [showChat, setShowChat] = useState(false);
               {profile && (
                 <div className="grid grid-cols-2 gap-4">
                   <BudgetCard spent={monthlySpent} budget={profile.monthlyBudget} />
-                  <GoalProgress goal={profile.savingsGoal} />
+                  <GoalProgress goal={{ ...profile.savingsGoal, currentAmount: profile.savingsGoal.currentAmount + totalSaved }} />
                 </div>
               )}
 
@@ -494,21 +498,21 @@ const [showChat, setShowChat] = useState(false);
                   If you invested the ${totalSaved.toFixed(0)} you avoided spending:
                 </p>
                 <div className="overflow-x-auto">
-                  <svg viewBox={`0 0 ${CHART_W} ${CHART_H + 36}`} width="100%" style={{ minWidth: 280 }}>
+                  <svg viewBox={`0 0 ${CHART_W} ${CHART_H + CHART_TOP_PAD + 36}`} width="100%" style={{ minWidth: 280 }}>
                     {projectionData.map((d, i) => {
                       const barH = Math.max(4, (d.value / maxProjection) * CHART_H);
                       const x = slotW * i + (slotW - BAR_W) / 2;
-                      const y = CHART_H - barH;
+                      const y = CHART_TOP_PAD + (CHART_H - barH);
                       const isLast = i === projectionData.length - 1;
                       const color = isLast ? "#560700" : SASE_COLORS[i % SASE_COLORS.length];
                       return (
                         <g key={d.label}>
-                          <rect x={x} y={0} width={BAR_W} height={CHART_H} rx="6" fill="#fef9ee" />
+                          <rect x={x} y={0} width={BAR_W} height={CHART_H + CHART_TOP_PAD} rx="6" fill="#fef9ee" />
                           <rect x={x} y={y} width={BAR_W} height={barH} rx="6" fill={color} opacity={isLast ? 1 : 0.7} />
                           <text x={x + BAR_W / 2} y={y - 5} textAnchor="middle" fontSize="9" fontWeight="700" fill={isLast ? "#560700" : "#a0707a"} fontFamily="monospace">
                             ${d.value >= 1000 ? `${(d.value / 1000).toFixed(1)}k` : d.value.toFixed(0)}
                           </text>
-                          <text x={x + BAR_W / 2} y={CHART_H + 16} textAnchor="middle" fontSize="10" fill={isLast ? "#560700" : "#c0808a"} fontWeight={isLast ? "700" : "400"} fontFamily="monospace">
+                          <text x={x + BAR_W / 2} y={CHART_H + CHART_TOP_PAD + 16} textAnchor="middle" fontSize="10" fill={isLast ? "#560700" : "#c0808a"} fontWeight={isLast ? "700" : "400"} fontFamily="monospace">
                             {d.label}
                           </text>
                         </g>
@@ -603,7 +607,7 @@ const [showChat, setShowChat] = useState(false);
 
       {tab === "ledger" && (
         <div style={{ position: "fixed", top: 0, left: 64, right: 0, bottom: 0, backgroundColor: "#fef9ee", zIndex: 10, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          <LedgerTable history={history} />
+          <LedgerTable history={history} userId={userId} onDeleteHistory={deleteHistory} />
         </div>
       )}
 

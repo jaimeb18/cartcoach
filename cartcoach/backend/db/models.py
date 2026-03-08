@@ -77,3 +77,37 @@ def wishlist_doc(
         "saved_at": now_utc().isoformat(),
         "remind_at": remind_at,
     }
+
+
+# Ledger entry document helper
+def ledger_entry_doc(
+    user_id: str,
+    date: str,
+    description: str,
+    category: str,
+    inflow: float = None,
+    outflow: float = None,
+    notes: str = "",
+    entry_id: str = None,
+    source: str = "manual",
+) -> dict:
+    from uuid import uuid4
+    from datetime import datetime
+
+    def now_utc():
+        return datetime.utcnow()
+
+    return {
+        "id": entry_id or str(uuid4()),
+        "user_id": user_id,
+        "date": date,
+        "description": description,
+        "category": category,
+        "inflow": inflow,
+        "outflow": outflow,
+        "notes": notes,
+        "created_at": now_utc().isoformat(),
+        "updated_at": now_utc().isoformat(),
+        "sync_status": "synced",
+        "source": source,
+    }
