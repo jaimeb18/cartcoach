@@ -86,32 +86,11 @@ async def answer_question(question: str, product, profile: UserProfile) -> str:
 # --- Gemini implementations ---
 
 async def _gemini_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y, investment_data=None) -> str:
-    investment_context = ""
-    if investment_data and investment_data.get("breakdown"):
-        lines = []
-        for opt in investment_data["breakdown"]:
-            lines.append(f"  - {opt['vehicle']} ({opt['rate_pct']}%/yr): grows to ${opt['future_value']:.2f} (+${opt['gain']:.2f})")
-        investment_context = "\nIf saved and invested for 5 years:\n" + "\n".join(lines)
-
-    prompt = f"""Output exactly 3 bullet points (using • ) with factual numbers only. No sentences, no greeting, no opinion, no emojis, no conversational language. Pure financial facts.
-
-Data:
-- Product: {product.product_name} — ${product.price:.2f}
-- Budget used: {budget_impact['budget_pct']:.0f}% of ${profile.monthly_budget}/mo, ${budget_impact['remaining_after']:.2f} remaining
-- Goal "{profile.savings_goal.name}": delayed by {goal_delay_days} days ({profile.savings_goal.current_amount:.0f}/{profile.savings_goal.target_amount:.0f} saved){investment_context}
-- 5-year invested value: ${future_value_5y:.2f}
-
-Output format (fill in real numbers, nothing else):
-• ${product.price:.2f} = {budget_impact['budget_pct']:.0f}% of your ${profile.monthly_budget:.0f}/mo budget, leaving ${budget_impact['remaining_after']:.2f}
-• Delays "{profile.savings_goal.name}" goal by {goal_delay_days} days
-• Invested at 7%/yr over 5 years: ${future_value_5y:.2f}"""
-
-    try:
-        response = await _model.generate_content_async(prompt)
-        return response.text.strip()
-    except Exception as e:
-        print(f"[Gemini message error] {e}")
-        return _template_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y)
+    return (
+        f"• ${product.price:.2f} = {budget_impact['budget_pct']:.0f}% of your ${profile.monthly_budget:.0f}/mo budget, leaving ${budget_impact['remaining_after']:.2f}\n"
+        f"• Delays \"{profile.savings_goal.name}\" goal by {goal_delay_days} days\n"
+        f"• Invested at 7%/yr over 5 years: ${future_value_5y:.2f}"
+    )
 
 
 async def _gemini_recommendation(risk_level, profile, budget_impact, goal_delay_days) -> str:
