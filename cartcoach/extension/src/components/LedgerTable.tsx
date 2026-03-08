@@ -95,12 +95,24 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
         setCurrentDate(new Date(parseInt(e.target.value), currentDate.getMonth(), 1));
     };
 
-    // Final balance based on inflows vs outflows
-    const finalBalance = rows.reduce((acc, row) => {
-        const inVal = parseFloat(row.inflow) || 0;
-        const outVal = parseFloat(row.outflow) || 0;
-        return acc + inVal - outVal;
-    }, 0);
+    // Compute running balances for all rows
+    const computedRows = React.useMemo(() => {
+        let runningBalance: number | null = 0;
+        return rows.map((row, idx) => {
+            const inflow = row.inflow.trim() === "" ? null : parseFloat(row.inflow);
+            const outflow = row.outflow.trim() === "" ? null : parseFloat(row.outflow);
+            if (inflow === null && outflow === null) {
+                // No input for this row, so no balance
+                return { ...row, balance: "" };
+            }
+            // If first row, start from 0 if missing
+            if (runningBalance === null) runningBalance = 0;
+            runningBalance += (inflow || 0) - (outflow || 0);
+            return { ...row, balance: runningBalance.toFixed(2) };
+        });
+    }, [rows]);
+
+    const finalBalance = computedRows.length > 0 ? parseFloat(computedRows[computedRows.length - 1].balance) : 0;
 
     const handleCellClick = (id: string, field: keyof LedgerRow) => {
         setEditingCell({ id, field });
@@ -253,15 +265,15 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.map((row) => (
+                            {computedRows.map((row) => (
                                 <tr key={row.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors last:border-0">
                                     {(["date", "description", "category", "inflow", "outflow", "balance", "notes"] as const).map(field => (
                                         <td
                                             key={field}
                                             className="px-4 py-3 cursor-text relative group truncate"
-                                            onClick={() => handleCellClick(row.id, field)}
+                                            onClick={() => field !== 'balance' && handleCellClick(row.id, field)}
                                         >
-                                            {editingCell?.id === row.id && editingCell?.field === field ? (
+                                            {editingCell?.id === row.id && editingCell?.field === field && field !== 'balance' ? (
                                                 <div className="relative w-full h-full flex items-center">
                                                     {field === 'category' && suggestion && (
                                                         <div className="absolute left-1.5 text-sm text-gray-400 pointer-events-none whitespace-pre">
