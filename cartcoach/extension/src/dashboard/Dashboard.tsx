@@ -5,8 +5,10 @@ import GoalProgress from "../components/GoalProgress";
 import LedgerTable from "../components/LedgerTable";
 import { STORAGE_KEYS } from "@shared/constants";
 import type { UserProfile, SpendingHistory, WishlistItem } from "@shared/types";
+import boxClosed from "./box-closed.png";
+import boxOpen from "./box-open.png";
 
-type Tab = "overview" | "history" | "wishlist" | "insights";
+type Tab = "overview" | "history" | "wishlist" | "insights" | "ledger";
 
 const SASE_COLORS = ["#e8a0bc", "#f59e0b", "#60a5fa", "#34d399", "#f97316", "#a78bfa"];
 const ACCENT_BORDERS = ["#e8a0bc", "#f59e0b", "#60a5fa", "#34d399", "#f97316", "#a78bfa"];
@@ -62,7 +64,19 @@ const NAV_ITEMS: { id: Tab; label: string; icon: JSX.Element }[] = [
       </svg>
     ),
   },
-];
+  {
+    id: "ledger",
+    label: "Ledger",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <line x1="3" y1="9" x2="21" y2="9" />
+        <line x1="3" y1="15" x2="21" y2="15" />
+        <line x1="9" y1="9" x2="9" y2="21" />
+      </svg>
+    ),
+  },
+] as { id: Tab; label: string; icon: JSX.Element }[];
 
 export default function Dashboard() {
   const { getValue } = useStorage();
@@ -70,10 +84,9 @@ export default function Dashboard() {
   const [history, setHistory] = useState<SpendingHistory[]>([]);
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [tab, setTab] = useState<Tab>("overview");
-  const [showLedger, setShowLedger] = useState(false);
-  const [showChat, setShowChat] = useState(false);
+const [showChat, setShowChat] = useState(false);
   const [chatMessages, setChatMessages] = useState<{ role: "bot" | "user"; text: string }[]>([
-    { role: "bot", text: "how can i help?" },
+    { role: "bot", text: "psst... i saw ur cart. wanna talk about it?" },
   ]);
   const [chatInput, setChatInput] = useState("");
   const [chatSending, setChatSending] = useState(false);
@@ -216,20 +229,6 @@ export default function Dashboard() {
             );
           })}
 
-          {/* Ledger button */}
-          <button
-            onClick={() => setShowLedger(true)}
-            title="Open Ledger"
-            className="flex items-center justify-center w-10 h-10 rounded-xl transition-all mt-1"
-            style={{ color: "#c0808a" }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <line x1="3" y1="9" x2="21" y2="9" />
-              <line x1="3" y1="15" x2="21" y2="15" />
-              <line x1="9" y1="9" x2="9" y2="21" />
-            </svg>
-          </button>
         </div>
 
         {/* Settings */}
@@ -550,46 +549,38 @@ export default function Dashboard() {
             </div>
           )}
 
-          <p className="text-[10px] text-center pb-2" style={{ color: "#c0808a", fontFamily: "monospace" }}>
-            General financial wellness insights only · Not financial advice · 7% return is an estimate
-          </p>
+          {tab !== "ledger" && (
+            <p className="text-[10px] text-center pb-2" style={{ color: "#c0808a", fontFamily: "monospace" }}>
+              General financial wellness insights only · Not financial advice · 7% return is an estimate
+            </p>
+          )}
         </div>
       </main>
 
-      {showLedger && <LedgerTable onClose={() => setShowLedger(false)} />}
+      {tab === "ledger" && (
+        <div style={{ position: "fixed", top: 0, left: 64, right: 0, bottom: 0, backgroundColor: "#fef9ee", zIndex: 10, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <LedgerTable />
+        </div>
+      )}
+
 
       {/* ── Floating chat ── */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
         {showChat && (
+          <div style={{ position: "relative" }}>
           <div
             className="flex flex-col overflow-hidden"
             style={{
-              width: 308,
-              maxHeight: 440,
-              backgroundColor: "#fff",
-              border: "2px solid #fde8c8",
-              borderRadius: 20,
-              boxShadow: "0 8px 32px rgba(86,7,0,0.18)",
+              width: 300,
+              maxHeight: 400,
+              backgroundColor: "#fff9f5",
+              border: "2.5px solid #f9c8d8",
+              borderRadius: 32,
+              boxShadow: "0 8px 32px rgba(232,160,188,0.35)",
             }}
           >
-            {/* Header */}
-            <div
-              className="flex items-center justify-between px-4 py-3 shrink-0"
-              style={{ background: "linear-gradient(135deg, #560700, #c0506a)" }}
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#34d399" }} />
-                <span className="text-[13px] font-bold text-white" style={{ fontFamily: "monospace" }}>CartCoach AI</span>
-              </div>
-              <button onClick={() => setShowChat(false)} style={{ color: "rgba(255,255,255,0.6)", lineHeight: 0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2" style={{ backgroundColor: "#fef9ee" }}>
+            <div className="flex-1 overflow-y-auto p-4 space-y-2" style={{ backgroundColor: "#fff9f5" }}>
               {chatMessages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
@@ -630,17 +621,17 @@ export default function Dashboard() {
             </div>
 
             {/* Input */}
-            <div className="p-3 shrink-0" style={{ borderTop: "1.5px solid #fde8c8", backgroundColor: "#fff" }}>
+            <div className="p-3 shrink-0" style={{ borderTop: "1.5px solid #f9c8d8", backgroundColor: "#fff9f5" }}>
               <div className="flex gap-2 items-center">
                 <input
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendChat()}
-                  placeholder="ask anything..."
+                  placeholder="say something..."
                   className="flex-1 text-[12px] px-3 py-2 rounded-xl outline-none"
                   style={{
-                    backgroundColor: "#fef9ee",
-                    border: "1.5px solid #fde8c8",
+                    backgroundColor: "#fff",
+                    border: "1.5px solid #f9c8d8",
                     color: "#560700",
                     fontFamily: "monospace",
                   }}
@@ -658,26 +649,43 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          {/* Speech bubble tail - border */}
+          <div style={{ position: "absolute", bottom: -23, right: 78, width: 0, height: 0, borderLeft: "15px solid transparent", borderRight: "15px solid transparent", borderTop: "23px solid #f9c8d8" }} />
+          {/* Speech bubble tail - fill */}
+          <div style={{ position: "absolute", bottom: -19, right: 80, width: 0, height: 0, borderLeft: "13px solid transparent", borderRight: "13px solid transparent", borderTop: "20px solid #fff9f5" }} />
+          </div>
         )}
 
         {/* Toggle button */}
         <button
           onClick={() => setShowChat((v) => !v)}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform active:scale-95"
-          style={{
-            background: "linear-gradient(135deg, #560700, #c0506a)",
-            boxShadow: "0 4px 20px rgba(86,7,0,0.35)",
-          }}
+          className="relative active:scale-95"
+          style={{ width: 200, height: 200, background: "none", border: "none", padding: 0, cursor: "pointer", transition: "transform 0.15s" }}
         >
-          {showChat ? (
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-          )}
+          <img
+            src={boxClosed}
+            alt="open chat"
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "contain",
+              opacity: showChat ? 0 : 1,
+              transform: showChat ? "scale(0.8) translateY(6px)" : "scale(1) translateY(0)",
+              transition: "opacity 0.3s ease, transform 0.3s ease",
+              pointerEvents: showChat ? "none" : "auto",
+            }}
+          />
+          <img
+            src={boxOpen}
+            alt="close chat"
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "contain",
+              opacity: showChat ? 1 : 0,
+              transform: showChat ? "scale(1) translateY(0)" : "scale(0.8) translateY(6px)",
+              transition: "opacity 0.3s ease, transform 0.3s ease",
+              pointerEvents: showChat ? "auto" : "none",
+            }}
+          />
         </button>
       </div>
     </div>
