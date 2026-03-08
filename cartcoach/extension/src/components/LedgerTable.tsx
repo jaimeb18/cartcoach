@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import type { SpendingHistory } from "@shared/types";
 
 export type LedgerRow = {
     id: string;
@@ -16,6 +17,22 @@ const MONTHS = [
     "July", "August", "September", "October", "November", "December"
 ];
 
+function historyToRow(item: SpendingHistory): LedgerRow {
+    const d = new Date(item.timestamp);
+    const date = `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+    const isPurchase = item.action === "purchased";
+    return {
+        id: item.id,
+        date,
+        description: item.product.productName,
+        category: item.product.category,
+        inflow: isPurchase ? "" : item.product.price.toString(),
+        outflow: isPurchase ? item.product.price.toString() : "",
+        balance: "",
+        notes: item.product.site,
+    };
+}
+
 // Generate years from 2020 to 2030
 const YEARS = Array.from({ length: 11 }, (_, i) => 2020 + i);
 
@@ -23,7 +40,7 @@ const CATEGORIES = [
     "Grocery", "Income", "Transportation", "Utilities", "Housing", "Discretionary Spending", "Savings"
 ];
 
-export default function LedgerTable() {
+export default function LedgerTable({ history = [] }: { history?: SpendingHistory[] }) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [editingCell, setEditingCell] = useState<{ id: string, field: keyof LedgerRow } | null>(null);
     const [suggestion, setSuggestion] = useState<string>("");
@@ -31,12 +48,12 @@ export default function LedgerTable() {
 
     const getDateString = (date: Date) => `${MONTHS[date.getMonth()]} , ${date.getFullYear()}`;
 
-    // Initial rows with current date
-    const [rows, setRows] = useState<LedgerRow[]>(
-        Array.from({ length: 10 }).map((_, i) => ({
-            id: `initial-${i}`, date: getDateString(currentDate), description: "", category: "", inflow: "", outflow: "", balance: "", notes: ""
-        }))
-    );
+    const [rows, setRows] = useState<LedgerRow[]>(() => [
+        ...history.map(historyToRow),
+        ...Array.from({ length: 5 }).map((_, i) => ({
+            id: `empty-${i}`, date: getDateString(new Date()), description: "", category: "", inflow: "", outflow: "", balance: "", notes: ""
+        })),
+    ]);
 
     // Sync dates when calendar month/year changes
     useEffect(() => {

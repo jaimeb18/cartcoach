@@ -559,7 +559,7 @@ const [showChat, setShowChat] = useState(false);
 
       {tab === "ledger" && (
         <div style={{ position: "fixed", top: 0, left: 64, right: 0, bottom: 0, backgroundColor: "#fef9ee", zIndex: 10, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          <LedgerTable />
+          <LedgerTable history={history} />
         </div>
       )}
 
