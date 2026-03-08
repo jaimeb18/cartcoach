@@ -15,20 +15,19 @@ export default function GoalProgress({ goal }: Props) {
   return (
     <div
       className="bg-white rounded-2xl p-5"
-      style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}
+      style={{ boxShadow: "0 2px 12px rgba(86,7,0,0.06)", border: "2px solid #fde8c8" }}
     >
-      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-3">
+      <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#e8a0bc", fontFamily: "monospace" }}>
         Savings Goal
       </p>
-
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
           <svg width="80" height="80" viewBox="0 0 80 80">
-            <circle cx="40" cy="40" r={R} fill="none" stroke="#f1f5f9" strokeWidth="8" />
+            <circle cx="40" cy="40" r={R} fill="none" stroke="#fce7ef" strokeWidth="8" />
             <circle
               cx="40" cy="40" r={R}
               fill="none"
-              stroke="#6366f1"
+              stroke="#e8a0bc"
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={`${dash} ${C}`}
@@ -38,21 +37,26 @@ export default function GoalProgress({ goal }: Props) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-[14px] font-bold text-gray-900">{Math.round(pct)}%</span>
+            <span className="text-[14px] font-bold" style={{ color: "#560700", fontFamily: "monospace" }}>
+              {Math.round(pct)}%
+            </span>
           </div>
         </div>
-
         <div className="min-w-0 flex-1">
-          <p className="text-[14px] font-bold text-gray-900 truncate leading-tight">{goal.name}</p>
-          <p className="text-[12px] text-gray-500 mt-1">
+          <p className="text-[14px] font-bold truncate leading-tight" style={{ color: "#560700" }}>
+            {goal.name}
+          </p>
+          <p className="text-[12px] mt-1" style={{ color: "#c0808a", fontFamily: "monospace" }}>
             ${goal.currentAmount.toLocaleString()}
-            <span className="text-gray-300 mx-1">/</span>
+            <span className="mx-1" style={{ color: "#f0c0cc" }}>/</span>
             ${goal.targetAmount.toLocaleString()}
           </p>
           {pct >= 100 ? (
-            <p className="text-[11px] text-emerald-500 font-semibold mt-1.5">Goal reached!</p>
+            <p className="text-[11px] font-bold mt-1.5" style={{ color: "#e8a0bc" }}>Goal reached!</p>
           ) : (
-            <p className="text-[11px] text-gray-400 mt-1.5">${remaining.toLocaleString()} remaining</p>
+            <p className="text-[11px] mt-1.5" style={{ color: "#c0808a", fontFamily: "monospace" }}>
+              ${remaining.toLocaleString()} remaining
+            </p>
           )}
         </div>
       </div>

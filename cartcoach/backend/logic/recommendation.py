@@ -15,7 +15,7 @@ _model = None
 
 if _GEMINI_KEY:
     genai.configure(api_key=_GEMINI_KEY)
-    _model = genai.GenerativeModel("gemini-2.0-flash")
+    _model = genai.GenerativeModel("gemini-2.5-flash")
 
 
 _TONE_INSTRUCTIONS = {
