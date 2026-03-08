@@ -34,6 +34,7 @@ export default defineConfig({
         dashboard: resolve(__dirname, "src/dashboard/index.html"),
         options: resolve(__dirname, "src/options/index.html"),
         background: resolve(__dirname, "src/background/background.ts"),
+        modal: resolve(__dirname, "src/modal/index.html"),
       },
       output: {
         entryFileNames: (chunk) => `${chunk.name}/${chunk.name}.js`,

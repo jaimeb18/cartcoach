@@ -61,7 +61,14 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["onboarding/index.html", "dashboard/index.html"],
+      "resources": [
+        "onboarding/index.html",
+        "dashboard/index.html",
+        "modal/index.html",
+        "modal/modal.js",
+        "chunks/*.js",
+        "assets/*"
+      ],
       "matches": ["<all_urls>"]
     }
   ]
