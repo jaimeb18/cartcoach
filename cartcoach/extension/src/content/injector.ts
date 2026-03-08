@@ -46,7 +46,7 @@ export function injectModal(
     z-index: 2147483647;
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-    overflow: hidden;
+    overflow-y: auto;
     border: none;
   `;
 
@@ -54,7 +54,9 @@ export function injectModal(
   iframe.src = chrome.runtime.getURL("modal/index.html");
   iframe.style.cssText = `
     width: 100%;
-    height: 600px;
+    height: 100%;
+    min-height: 500px;
+    max-height: 90vh;
     border: none;
     border-radius: 16px;
     background: transparent;

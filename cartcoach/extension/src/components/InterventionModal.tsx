@@ -26,8 +26,8 @@ export default function InterventionModal({
   const [showAlts, setShowAlts] = useState(false);
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999999] flex items-end sm:items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-slide-up">
+    <div className="min-h-full flex flex-col">
+      <div className="bg-white rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col max-h-screen">
         {/* Header */}
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-white">
           <div className="flex items-start justify-between">
@@ -48,7 +48,7 @@ export default function InterventionModal({
           </div>
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="p-4 space-y-4 overflow-y-auto flex-1">
           {/* Product */}
           <div className="flex items-center justify-between">
             <div>
