@@ -10,8 +10,8 @@ export default function AlternativeCard({ alternative, originalPrice }: Props) {
   const savings = originalPrice - alternative.price;
   const pctSaved = Math.round((savings / originalPrice) * 100);
 
-  return (
-    <div className="flex items-center justify-between bg-white border border-gray-100 rounded-xl p-3 hover:border-green-200 transition-colors">
+  const content = (
+    <>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-800 truncate">{alternative.name}</p>
         {alternative.source && (
@@ -24,6 +24,18 @@ export default function AlternativeCard({ alternative, originalPrice }: Props) {
           <p className="text-xs text-green-600 font-medium">Save {pctSaved}%</p>
         )}
       </div>
-    </div>
+    </>
   );
+
+  const className = "flex items-center justify-between bg-white border border-gray-100 rounded-xl p-3 hover:border-green-200 transition-colors";
+
+  if (alternative.url) {
+    return (
+      <a href={alternative.url} target="_blank" rel="noopener noreferrer" className={className + " no-underline cursor-pointer"}>
+        {content}
+      </a>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }

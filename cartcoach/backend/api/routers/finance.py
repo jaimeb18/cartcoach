@@ -19,8 +19,8 @@ from logic.recommendation import generate_message, generate_recommendation
 router = APIRouter()
 
 
-@router.post("/analyze", response_model=FinanceAnalysis)
-async def analyze_purchase(req: AnalyzeRequest) -> FinanceAnalysis:
+@router.post("/analyze", response_model=FinanceAnalysis, response_model_by_alias=True)
+async def analyze_purchase(req: AnalyzeRequest):
     """
     Core endpoint. Accepts a product + user profile, returns full financial analysis.
     Calls Gemini for AI-generated nudge messages. Saves analysis to MongoDB.
@@ -42,7 +42,7 @@ async def analyze_purchase(req: AnalyzeRequest) -> FinanceAnalysis:
     )
 
     from api.routers.alternatives import find_alternatives
-    alternatives = find_alternatives(product.product_name, product.category, product.price)
+    alternatives = await find_alternatives(product.product_name, product.category, product.price)
 
     return FinanceAnalysis(
         show_popup=risk_score > 15,

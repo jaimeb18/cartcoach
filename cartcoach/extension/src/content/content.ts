@@ -84,8 +84,14 @@ async function triggerIntervention() {
   const productInfo = extractProductInfo(site);
   if (!productInfo?.productName || !productInfo?.price) return;
 
-  const profile = await getUserProfile();
-  if (!profile) return;
+  const profile = await getUserProfile() ?? {
+    id: "demo-user",
+    monthlyBudget: 1000,
+    monthlySaved: 200,
+    savingsGoal: { name: "Emergency Fund", targetAmount: 5000, currentAmount: 1000 },
+    watchedCategories: ["Fashion", "Electronics", "Beauty"],
+    cooldownHours: 48,
+  };
 
   const product: ExtractedProduct = {
     site,
@@ -121,10 +127,43 @@ async function triggerIntervention() {
   );
 }
 
-// Boot
+// Checkout button selectors to intercept
+const CHECKOUT_BTN_SELECTORS = [
+  "#checkoutBtn",                          // Demo page
+  "[name='placeYourOrder1']",              // Amazon
+  "button[data-test='placeOrderButton']",  // Target
+  "#orderSummary button",                  // Walmart
+  ".btn-checkout",                         // Generic
+  "button[type='submit'][class*='checkout']",
+  "button[class*='place-order']",
+  "button[class*='placeOrder']",
+  "input[type='submit'][value*='order']",
+];
+
+function attachCheckoutListeners() {
+  for (const selector of CHECKOUT_BTN_SELECTORS) {
+    const buttons = document.querySelectorAll<HTMLElement>(selector);
+    buttons.forEach((btn) => {
+      if (btn.dataset.cartcoachBound) return;
+      btn.dataset.cartcoachBound = "true";
+      btn.addEventListener("click", (e) => {
+        if (!interventionShown) {
+          e.preventDefault();
+          e.stopPropagation();
+          triggerIntervention();
+        }
+      }, true);
+    });
+  }
+}
+
+// Boot — attach listeners when on a checkout page
 waitForCheckout(() => {
   interventionShown = false;
-  triggerIntervention();
+  setTimeout(attachCheckoutListeners, 800);
+
+  const observer = new MutationObserver(() => attachCheckoutListeners());
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 
 // Reset flag on page unload so next visit works

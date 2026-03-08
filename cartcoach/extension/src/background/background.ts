@@ -33,7 +33,12 @@ async function analyzeProduct(
       body: JSON.stringify({ product, profile }),
     });
     if (!res.ok) throw new Error("Backend unreachable");
-    return await res.json();
+    const data = await res.json();
+    // Normalize: backend sends futureValue5Y, frontend expects futureValue5y
+    if (data.futureValue5Y !== undefined && data.futureValue5y === undefined) {
+      data.futureValue5y = data.futureValue5Y;
+    }
+    return data;
   } catch {
     // Fallback local calculation
     return fallbackAnalysis(product, profile);

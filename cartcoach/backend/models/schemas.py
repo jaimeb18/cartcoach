@@ -1,6 +1,15 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+from pydantic.alias_generators import to_camel
 from typing import Optional, List
 from enum import Enum
+
+
+class CamelModel(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        serialize_by_alias=True,
+    )
 
 
 class RiskLevel(str, Enum):
@@ -16,14 +25,14 @@ class ToneMode(str, Enum):
     professional = "professional"
 
 
-class SavingsGoal(BaseModel):
+class SavingsGoal(CamelModel):
     name: str
     target_amount: float
     current_amount: float
     target_date: Optional[str] = None
 
 
-class UserProfile(BaseModel):
+class UserProfile(CamelModel):
     id: str
     monthly_budget: float
     monthly_saved: float = 0.0
@@ -33,7 +42,7 @@ class UserProfile(BaseModel):
     tone_mode: ToneMode = ToneMode.gentle
 
 
-class ExtractedProduct(BaseModel):
+class ExtractedProduct(CamelModel):
     site: str
     product_name: str
     price: float
@@ -58,7 +67,7 @@ class InvestmentOption(BaseModel):
     years: int
 
 
-class FinanceAnalysis(BaseModel):
+class FinanceAnalysis(CamelModel):
     show_popup: bool
     risk_score: int = Field(ge=0, le=100)
     risk_level: RiskLevel
@@ -98,7 +107,7 @@ class ChatResponse(BaseModel):
     answer: str
 
 
-class AnalyzeRequest(BaseModel):
+class AnalyzeRequest(CamelModel):
     product: ExtractedProduct
     profile: UserProfile
 
