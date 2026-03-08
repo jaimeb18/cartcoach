@@ -65,6 +65,37 @@ def calculate_future_value(amount: float, years: int = 5) -> float:
     return round(fv, 2)
 
 
+def calculate_investment_breakdown(amount: float, years: int = 5) -> dict:
+    """
+    Shows what the saved amount would grow to across different investment vehicles.
+    Rates are conservative educational estimates, not financial advice.
+    """
+    vehicles = [
+        {"name": "S&P 500 index fund", "rate": 0.10, "label": "stocks"},
+        {"name": "High-yield savings account", "rate": 0.045, "label": "savings"},
+        {"name": "2-year CD", "rate": 0.05, "label": "cd"},
+    ]
+
+    breakdown = []
+    for v in vehicles:
+        fv = round(amount * ((1 + v["rate"]) ** years), 2)
+        gain = round(fv - amount, 2)
+        breakdown.append({
+            "vehicle": v["name"],
+            "label": v["label"],
+            "rate_pct": round(v["rate"] * 100, 1),
+            "future_value": fv,
+            "gain": gain,
+            "years": years,
+        })
+
+    return {
+        "amount": amount,
+        "years": years,
+        "breakdown": breakdown,
+    }
+
+
 def calculate_monthly_goal_progress(profile: UserProfile) -> dict:
     """
     Returns progress summary toward the savings goal.

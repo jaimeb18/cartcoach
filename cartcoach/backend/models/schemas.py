@@ -49,6 +49,15 @@ class Alternative(BaseModel):
     source: Optional[str] = None
 
 
+class InvestmentOption(BaseModel):
+    vehicle: str
+    label: str
+    rate_pct: float
+    future_value: float
+    gain: float
+    years: int
+
+
 class FinanceAnalysis(BaseModel):
     show_popup: bool
     risk_score: int = Field(ge=0, le=100)
@@ -57,6 +66,7 @@ class FinanceAnalysis(BaseModel):
     remaining_budget: float
     goal_delay_days: int
     future_value_5y: float
+    investment_breakdown: List[InvestmentOption] = []
     recommendation: str
     message: str
     alternatives: List[Alternative] = []

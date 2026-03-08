@@ -10,7 +10,9 @@ from logic.finance_engine import (
     calculate_budget_impact,
     calculate_goal_delay,
     calculate_future_value,
+    calculate_investment_breakdown,
 )
+from models.schemas import InvestmentOption
 from logic.scoring import compute_risk_score, risk_level_from_score
 from logic.recommendation import generate_message, generate_recommendation
 
@@ -29,13 +31,14 @@ async def analyze_purchase(req: AnalyzeRequest) -> FinanceAnalysis:
     budget_impact = calculate_budget_impact(product, profile)
     goal_delay_days = calculate_goal_delay(product, profile)
     future_value_5y = calculate_future_value(product.price, years=5)
+    investment_data = calculate_investment_breakdown(product.price, years=5)
 
     risk_score = compute_risk_score(product, profile, budget_impact, goal_delay_days)
     risk_level = risk_level_from_score(risk_score)
 
     # Gemini-powered messages (async, with template fallback)
     message, recommendation = await _generate_messages(
-        product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y
+        product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y, investment_data
     )
 
     from api.routers.alternatives import find_alternatives
@@ -49,17 +52,18 @@ async def analyze_purchase(req: AnalyzeRequest) -> FinanceAnalysis:
         remaining_budget=budget_impact["remaining_after"],
         goal_delay_days=goal_delay_days,
         future_value_5y=future_value_5y,
+        investment_breakdown=[InvestmentOption(**opt) for opt in investment_data["breakdown"]],
         recommendation=recommendation,
         message=message,
         alternatives=alternatives[:3],
     )
 
 
-async def _generate_messages(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y):
+async def _generate_messages(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y, investment_data):
     """Run both Gemini calls concurrently."""
     import asyncio
     message, recommendation = await asyncio.gather(
-        generate_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y),
+        generate_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y, investment_data),
         generate_recommendation(risk_level, profile, budget_impact, goal_delay_days),
     )
     return message, recommendation

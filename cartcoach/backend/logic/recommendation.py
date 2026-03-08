@@ -15,7 +15,7 @@ _model = None
 
 if _GEMINI_KEY:
     genai.configure(api_key=_GEMINI_KEY)
-    _model = genai.GenerativeModel("gemini-2.0-flash")
+    _model = genai.GenerativeModel("gemini-2.5-flash")
 
 
 _TONE_INSTRUCTIONS = {
@@ -33,10 +33,11 @@ async def generate_message(
     budget_impact: dict,
     goal_delay_days: int,
     future_value_5y: float,
+    investment_data: dict = None,
 ) -> str:
     if _model:
         return await _gemini_message(
-            product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y
+            product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y, investment_data
         )
     return _template_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y)
 
@@ -84,19 +85,27 @@ async def answer_question(question: str, product, profile: UserProfile) -> str:
 
 # --- Gemini implementations ---
 
-async def _gemini_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y) -> str:
+async def _gemini_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y, investment_data=None) -> str:
     tone = _TONE_INSTRUCTIONS.get(profile.tone_mode, _TONE_INSTRUCTIONS[ToneMode.gentle])
+
+    investment_context = ""
+    if investment_data and investment_data.get("breakdown"):
+        lines = []
+        for opt in investment_data["breakdown"]:
+            lines.append(f"  - {opt['vehicle']} ({opt['rate_pct']}%/yr): grows to ${opt['future_value']:.2f} (+${opt['gain']:.2f})")
+        investment_context = "\nIf saved and invested for 5 years:\n" + "\n".join(lines)
+
     prompt = f"""You are CartCoach, a financial wellness assistant.
 {tone}
 Write a brief 1-2 sentence nudge message about this purchase. Mention specific numbers. No emojis.
+Optionally reference one of the investment options if it makes the message more compelling.
 
 Purchase: {product.product_name} — ${product.price:.2f} on {product.site}
 Category: {product.category}
 Budget used: {budget_impact['budget_pct']:.0f}% of ${profile.monthly_budget} monthly budget
 Remaining after purchase: ${budget_impact['remaining_after']:.2f}
 Savings goal: "{profile.savings_goal.name}" ({profile.savings_goal.current_amount:.0f}/{profile.savings_goal.target_amount:.0f} saved)
-Goal delay: {goal_delay_days} days
-Future value if saved (5yr @ 7%): ${future_value_5y:.2f}
+Goal delay: {goal_delay_days} days{investment_context}
 Risk level: {risk_level.value}
 
 Write only the message."""
