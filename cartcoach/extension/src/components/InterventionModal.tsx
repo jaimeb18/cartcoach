@@ -26,8 +26,8 @@ export default function InterventionModal({
   const [showAlts, setShowAlts] = useState(false);
 
   return (
-    <div className="min-h-full flex flex-col">
-      <div className="bg-white rounded-2xl shadow-2xl w-full overflow-hidden flex flex-col max-h-screen">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999999] flex items-end sm:items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-slide-up">
         {/* Header */}
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-white">
           <div className="flex items-start justify-between">
@@ -48,7 +48,7 @@ export default function InterventionModal({
           </div>
         </div>
 
-        <div className="p-4 space-y-4 overflow-y-auto flex-1">
+        <div className="p-4 space-y-4">
           {/* Product */}
           <div className="flex items-center justify-between">
             <div>
@@ -68,7 +68,7 @@ export default function InterventionModal({
           />
 
           {/* Impact stats */}
-          <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="grid grid-cols-3 gap-2 text-center" style={{ width: "100%", display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
             <div className="bg-gray-50 rounded-xl p-2.5">
               <p className="text-xs text-gray-400 leading-tight">Budget impact</p>
               <p className="text-sm font-bold text-gray-800 mt-1">
@@ -119,8 +119,8 @@ export default function InterventionModal({
           )}
 
           {/* Actions */}
-          <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-2" style={{ width: "100%" }}>
+            <div className="grid grid-cols-2 gap-2" style={{ width: "100%", display: "grid", gridTemplateColumns: "repeat(2, 1fr)" }}>
               <button
                 onClick={onSkip}
                 className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"

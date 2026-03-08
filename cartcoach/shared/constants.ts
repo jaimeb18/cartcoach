@@ -21,6 +21,7 @@ export const SUPPORTED_SITES = [
   "walmart.com",
   "etsy.com",
   "ebay.com",
+  "gucci.com",
 ] as const;
 
 export const CHECKOUT_URL_PATTERNS = [

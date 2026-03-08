@@ -84,6 +84,13 @@ def find_alternatives_mock(
             scored.append((score, item))
 
     scored.sort(key=lambda x: (-x[0], x[1]["price"]))
+    results = scored[:max_results]
+
+    # If nothing matched, return the cheapest items under the price as a generic fallback
+    if not results:
+        cheaper = [item for item in _CATALOG if item["price"] < price]
+        cheaper.sort(key=lambda x: x["price"])
+        results = [(0, item) for item in cheaper[:max_results]]
 
     return [
         Alternative(
@@ -92,7 +99,7 @@ def find_alternatives_mock(
             url=item.get("url"),
             source=item.get("source"),
         )
-        for _, item in scored[:max_results]
+        for _, item in results
     ]
 
 

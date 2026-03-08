@@ -41,15 +41,20 @@ const extractors: Record<string, SiteExtractor> = {
   "target.com": {
     productName: () =>
       document.querySelector<HTMLElement>(
-        '[data-test="product-title"], h1[class*="ProductTitle"]'
+        '[data-test="product-title"], h1[class*="ProductTitle"], [data-test="cartItem-title"]'
       )?.innerText?.trim() ?? null,
     price: () => {
-      const el = document.querySelector<HTMLElement>(
-        '[data-test="product-price"], [class*="PriceFontSize"]'
-      );
-      if (el) {
-        const num = parseFloat(el.innerText.replace(/[^0-9.]/g, ""));
-        if (!isNaN(num)) return num;
+      const selectors = [
+        '[data-test="product-price"]',
+        '[class*="PriceFontSize"]',
+        '[data-test="cartItem-price"]',
+      ];
+      for (const sel of selectors) {
+        const el = document.querySelector<HTMLElement>(sel);
+        if (el) {
+          const num = parseFloat(el.innerText.replace(/[^0-9.]/g, ""));
+          if (!isNaN(num)) return num;
+        }
       }
       return null;
     },
@@ -127,6 +132,22 @@ const extractors: Record<string, SiteExtractor> = {
       return null;
     },
     category: () => "Other",
+  },
+
+  "gucci.com": {
+    productName: () =>
+      document.querySelector<HTMLElement>(
+        ".order-details-product-item-title, p.order-details-availability-product-title"
+      )?.innerText?.trim() ?? null,
+    price: () => {
+      const el = document.querySelector<HTMLElement>(".price-container");
+      if (el) {
+        const num = parseFloat(el.innerText.replace(/[^0-9.]/g, ""));
+        if (!isNaN(num)) return num;
+      }
+      return null;
+    },
+    category: () => "Fashion",
   },
 
   // Demo page (local file or localhost)

@@ -1,5 +1,5 @@
 import "../styles/global.css";
-import { isCheckoutPage, getCurrentSite, waitForCheckout } from "./detector";
+import { getCurrentSite, waitForCheckout } from "./detector";
 import { extractProductInfo } from "./extractor";
 import { injectModal } from "./injector";
 import { STORAGE_KEYS } from "@shared/constants";
@@ -72,17 +72,31 @@ async function saveToWishlist(product: ExtractedProduct, analysis: FinanceAnalys
   });
 }
 
+function showDebugDot(label: string, color: string) {
+  const existing = document.getElementById("cartcoach-debug-dot");
+  if (existing) existing.remove();
+  const dot = document.createElement("div");
+  dot.id = "cartcoach-debug-dot";
+  dot.textContent = label;
+  dot.style.cssText = `position:fixed;top:12px;left:12px;z-index:99999;background:${color};color:white;font-size:12px;padding:6px 10px;border-radius:999px;font-family:monospace;`;
+  document.body.appendChild(dot);
+}
+
 async function triggerIntervention() {
   if (interventionShown) return;
 
+  showDebugDot("1: triggerIntervention fired", "red");
+
   const site = getCurrentSite();
-  if (!site) return;
+  if (!site) { showDebugDot("2: no site matched", "orange"); return; }
 
   // Wait a bit for the page to fully render
   await new Promise((r) => setTimeout(r, 1200));
 
   const productInfo = extractProductInfo(site);
-  if (!productInfo?.productName || !productInfo?.price) return;
+  if (!productInfo?.productName || !productInfo?.price) { showDebugDot("3: product extract failed", "orange"); return; }
+
+  showDebugDot("4: product found - " + productInfo.productName, "blue");
 
   const profile = await getUserProfile() ?? {
     id: "demo-user",
@@ -104,7 +118,15 @@ async function triggerIntervention() {
 
   const analysis = await requestAnalysis(product, profile);
 
-  if (!analysis.showPopup) return;
+  // Debug dot: show alternatives count
+  const altDot = document.createElement("div");
+  altDot.id = "cartcoach-alt-dot";
+  altDot.textContent = `alts: ${analysis.alternatives?.length ?? 0}`;
+  altDot.style.cssText = `position:fixed;top:12px;left:12px;z-index:99999;background:purple;color:white;font-size:12px;padding:6px 10px;border-radius:999px;font-family:monospace;`;
+  document.getElementById("cartcoach-alt-dot")?.remove();
+  document.body.appendChild(altDot);
+
+  if (!analysis.showPopup) { showDebugDot("5: showPopup=false, riskScore=" + analysis.riskScore, "orange"); return; }
 
   interventionShown = true;
 
@@ -127,43 +149,10 @@ async function triggerIntervention() {
   );
 }
 
-// Checkout button selectors to intercept
-const CHECKOUT_BTN_SELECTORS = [
-  "#checkoutBtn",                          // Demo page
-  "[name='placeYourOrder1']",              // Amazon
-  "button[data-test='placeOrderButton']",  // Target
-  "#orderSummary button",                  // Walmart
-  ".btn-checkout",                         // Generic
-  "button[type='submit'][class*='checkout']",
-  "button[class*='place-order']",
-  "button[class*='placeOrder']",
-  "input[type='submit'][value*='order']",
-];
-
-function attachCheckoutListeners() {
-  for (const selector of CHECKOUT_BTN_SELECTORS) {
-    const buttons = document.querySelectorAll<HTMLElement>(selector);
-    buttons.forEach((btn) => {
-      if (btn.dataset.cartcoachBound) return;
-      btn.dataset.cartcoachBound = "true";
-      btn.addEventListener("click", (e) => {
-        if (!interventionShown) {
-          e.preventDefault();
-          e.stopPropagation();
-          triggerIntervention();
-        }
-      }, true);
-    });
-  }
-}
-
-// Boot — attach listeners when on a checkout page
+// Boot
 waitForCheckout(() => {
   interventionShown = false;
-  setTimeout(attachCheckoutListeners, 800);
-
-  const observer = new MutationObserver(() => attachCheckoutListeners());
-  observer.observe(document.body, { childList: true, subtree: true });
+  triggerIntervention();
 });
 
 // Reset flag on page unload so next visit works
