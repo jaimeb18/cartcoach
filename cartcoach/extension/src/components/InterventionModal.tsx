@@ -3,6 +3,7 @@ import RiskWarning from "./RiskWarning";
 import AlternativeCard from "./AlternativeCard";
 import CooldownButton from "./CooldownButton";
 import type { FinanceAnalysis, ExtractedProduct } from "@shared/types";
+import mochiImg from "./mochi.png";
 
 interface Props {
   product: ExtractedProduct;
@@ -26,128 +27,153 @@ export default function InterventionModal({
   const [showAlts, setShowAlts] = useState(false);
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999999] flex items-end sm:items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-slide-up">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 text-white">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs text-green-100 font-medium uppercase tracking-wide">
-                CartCoach
-              </p>
-              <h2 className="text-base font-bold mt-0.5 leading-tight">
-                Before you buy...
-              </h2>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-green-200 hover:text-white text-lg leading-none ml-2"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999999] flex items-center justify-center p-4">
+      <div
+        className="bg-white rounded-3xl shadow-2xl animate-slide-up flex flex-col"
+        style={{ width: "620px", maxWidth: "95vw", maxHeight: "90vh" }}
+      >
+        {/* Mochi mascot banner */}
+        <div
+          className="flex items-end gap-0 px-6 pt-4 pb-0 relative shrink-0"
+          style={{ background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)", borderBottom: "1.5px solid #f9c8d8", borderRadius: "24px 24px 0 0" }}
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            style={{ position: "absolute", top: 12, right: 16, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", fontSize: 18, lineHeight: 1 }}
+          >
+            ✕
+          </button>
 
-        <div className="p-4 space-y-4">
-          {/* Product */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-800 leading-tight">
-                {product.productName}
-              </p>
-              <p className="text-xs text-gray-400">{product.site}</p>
-            </div>
-            <p className="text-xl font-bold text-gray-900">${product.price}</p>
-          </div>
-
-          {/* Risk warning */}
-          <RiskWarning
-            riskLevel={analysis.riskLevel}
-            riskScore={analysis.riskScore}
-            message={analysis.message}
+          {/* Mochi image — big and prominent */}
+          <img
+            src={mochiImg}
+            alt="Mochi"
+            style={{ width: 160, height: 160, objectFit: "contain", flexShrink: 0, marginBottom: 0, filter: "drop-shadow(0 6px 16px rgba(232,160,188,0.5))" }}
           />
 
-          {/* Impact stats */}
-          <div className="grid grid-cols-3 gap-2 text-center" style={{ width: "100%", display: "grid", gridTemplateColumns: "repeat(3, 1fr)" }}>
-            <div className="bg-gray-50 rounded-xl p-2.5">
-              <p className="text-xs text-gray-400 leading-tight">Budget impact</p>
-              <p className="text-sm font-bold text-gray-800 mt-1">
-                {analysis.budgetImpact}
+          {/* Speech bubble + product info */}
+          <div style={{ flex: 1, paddingBottom: 20, paddingLeft: 8 }}>
+            {/* Speech bubble */}
+            <div style={{ position: "relative", background: "#fff", border: "2.5px solid #f9c8d8", borderRadius: 20, padding: "12px 16px" }}>
+              <p style={{ fontWeight: 800, fontSize: 20, color: "#c0506a", margin: 0, lineHeight: 1.2 }}>
+                wait... hold on! 🛑
               </p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-2.5">
-              <p className="text-xs text-gray-400 leading-tight">Goal delay</p>
-              <p className="text-sm font-bold text-gray-800 mt-1">
-                {analysis.goalDelayDays > 0 ? `+${analysis.goalDelayDays}d` : "None"}
+              <p style={{ fontSize: 12, color: "#6b7280", margin: "6px 0 10px", lineHeight: 1.4 }}>
+                you're about to buy:
               </p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-2.5">
-              <p className="text-xs text-gray-400 leading-tight">In 5 years</p>
-              <p className="text-sm font-bold text-green-600 mt-1">
-                ${analysis.futureValue5y.toFixed(0)}
+              <p style={{ fontWeight: 700, fontSize: 13, color: "#374151", margin: "0 0 4px", lineHeight: 1.3 }}>
+                {product.productName}
               </p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>{product.site}</p>
+                <p style={{ fontSize: 22, fontWeight: 800, color: "#111827", margin: 0 }}>${product.price}</p>
+              </div>
+              {/* Bubble tail pointing left toward mochi */}
+              <div style={{
+                position: "absolute", left: -13, top: 24,
+                width: 0, height: 0,
+                borderTop: "9px solid transparent",
+                borderBottom: "9px solid transparent",
+                borderRight: "13px solid #f9c8d8",
+              }} />
+              <div style={{
+                position: "absolute", left: -9, top: 25,
+                width: 0, height: 0,
+                borderTop: "8px solid transparent",
+                borderBottom: "8px solid transparent",
+                borderRight: "11px solid #fff",
+              }} />
             </div>
-          </div>
-
-          {/* Recommendation */}
-          <div className="bg-blue-50 border border-blue-100 rounded-xl px-3 py-2.5 text-center">
-            <p className="text-xs text-blue-600 font-medium">💡 {analysis.recommendation}</p>
-          </div>
-
-          {/* Alternatives */}
-          {analysis.alternatives.length > 0 && (
-            <div>
-              <button
-                onClick={() => setShowAlts((s) => !s)}
-                className="text-xs text-green-600 font-medium hover:underline flex items-center gap-1"
-              >
-                {showAlts ? "▲" : "▼"} {showAlts ? "Hide" : "Show"} cheaper alternatives
-                ({analysis.alternatives.length})
-              </button>
-              {showAlts && (
-                <div className="mt-2 space-y-2">
-                  {analysis.alternatives.map((alt, i) => (
-                    <AlternativeCard
-                      key={i}
-                      alternative={alt}
-                      originalPrice={product.price}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="space-y-2" style={{ width: "100%" }}>
-            <div className="grid grid-cols-2 gap-2" style={{ width: "100%", display: "grid", gridTemplateColumns: "repeat(2, 1fr)" }}>
-              <button
-                onClick={onSkip}
-                className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
-              >
-                Skip it 🎯
-              </button>
-              <button
-                onClick={onSaveLater}
-                className="bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-2.5 rounded-xl text-sm transition-colors"
-              >
-                Save for later
-              </button>
-            </div>
-            <CooldownButton onCooldown={onCooldown} />
-            <button
-              onClick={onBuy}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 py-2.5 rounded-xl text-sm transition-colors"
-            >
-              Buy anyway
-            </button>
           </div>
         </div>
 
-        <div className="px-4 pb-3 text-center">
-          <p className="text-[10px] text-gray-300">
-            Educational estimate only · Not financial advice
-          </p>
+        {/* Scrollable content */}
+        <div style={{ overflowY: "auto", flex: 1 }}>
+          <div className="p-5 space-y-4">
+            {/* Risk warning */}
+            <RiskWarning
+              riskLevel={analysis.riskLevel}
+              riskScore={analysis.riskScore}
+              message={analysis.message}
+            />
+
+            {/* Impact stats */}
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div style={{ background: "#fdf2f8", borderRadius: 14, padding: "10px 8px" }}>
+                <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>Budget impact</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#374151", marginTop: 4 }}>{analysis.budgetImpact}</p>
+              </div>
+              <div style={{ background: "#fdf2f8", borderRadius: 14, padding: "10px 8px" }}>
+                <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>Goal delay</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#374151", marginTop: 4 }}>
+                  {analysis.goalDelayDays > 0 ? `+${analysis.goalDelayDays}d` : "None"}
+                </p>
+              </div>
+              <div style={{ background: "#fdf2f8", borderRadius: 14, padding: "10px 8px" }}>
+                <p style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>In 5 years</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#059669", marginTop: 4 }}>${analysis.futureValue5y.toFixed(0)}</p>
+              </div>
+            </div>
+
+            {/* Recommendation */}
+            <div style={{ background: "#fdf2f8", border: "1.5px solid #f9c8d8", borderRadius: 14, padding: "10px 14px", textAlign: "center" }}>
+              <p style={{ fontSize: 12, color: "#c0506a", fontWeight: 600, margin: 0 }}>💡 {analysis.recommendation}</p>
+            </div>
+
+            {/* Alternatives */}
+            {analysis.alternatives.length > 0 && (
+              <div>
+                <button
+                  onClick={() => setShowAlts((s) => !s)}
+                  style={{ fontSize: 12, color: "#c0506a", fontWeight: 600, background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, padding: 0 }}
+                >
+                  {showAlts ? "▲" : "▼"} {showAlts ? "Hide" : "Show"} cheaper alternatives ({analysis.alternatives.length})
+                </button>
+                {showAlts && (
+                  <div className="mt-2 space-y-2">
+                    {analysis.alternatives.map((alt, i) => (
+                      <AlternativeCard key={i} alternative={alt} originalPrice={product.price} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={onSkip}
+                  style={{ background: "#e8a0bc", color: "#fff", fontWeight: 700, padding: "11px 0", borderRadius: 14, border: "none", cursor: "pointer", fontSize: 14 }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#d4789e")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "#e8a0bc")}
+                >
+                  Skip it 🎯
+                </button>
+                <button
+                  onClick={onSaveLater}
+                  style={{ background: "#fdf2f8", color: "#c0506a", fontWeight: 700, padding: "11px 0", borderRadius: 14, border: "1.5px solid #f9c8d8", cursor: "pointer", fontSize: 14 }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#fce7f3")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "#fdf2f8")}
+                >
+                  Wishlist
+                </button>
+              </div>
+              <button
+                onClick={onBuy}
+                style={{ width: "100%", background: "#f3f4f6", color: "#6b7280", fontWeight: 600, padding: "11px 0", borderRadius: 14, border: "none", cursor: "pointer", fontSize: 14 }}
+                onMouseEnter={e => (e.currentTarget.style.background = "#e5e7eb")}
+                onMouseLeave={e => (e.currentTarget.style.background = "#f3f4f6")}
+              >
+                Buy anyway
+              </button>
+            </div>
+          </div>
+
+          <div className="px-5 pb-4 text-center">
+            <p style={{ fontSize: 10, color: "#d1d5db", margin: 0 }}>Educational estimate only · Not financial advice</p>
+          </div>
         </div>
       </div>
     </div>

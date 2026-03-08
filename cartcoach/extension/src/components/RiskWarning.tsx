@@ -40,7 +40,11 @@ export default function RiskWarning({ riskLevel, riskScore, message }: Props) {
           {riskScore}/100
         </span>
       </div>
-      <p className={`text-xs leading-relaxed ${RISK_TEXT[riskLevel]}`}>{message}</p>
+      <ul className={`text-xs leading-relaxed ${RISK_TEXT[riskLevel]} space-y-0.5 list-none p-0 m-0`}>
+        {message.split('\n').filter(l => l.trim()).map((line, i) => (
+          <li key={i}>{line.trim()}</li>
+        ))}
+      </ul>
     </div>
   );
 }

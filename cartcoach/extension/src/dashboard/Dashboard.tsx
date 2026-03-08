@@ -79,7 +79,7 @@ const NAV_ITEMS: { id: Tab; label: string; icon: JSX.Element }[] = [
 ] as { id: Tab; label: string; icon: JSX.Element }[];
 
 export default function Dashboard() {
-  const { getValue } = useStorage();
+  const { getValue, setValue } = useStorage();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [history, setHistory] = useState<SpendingHistory[]>([]);
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
@@ -99,6 +99,18 @@ const [showChat, setShowChat] = useState(false);
     );
     getValue<WishlistItem[]>(STORAGE_KEYS.WISHLIST).then((w) => w && setWishlist(w));
   }, []);
+
+  const deleteHistory = async (id: string) => {
+    const updated = history.filter((h) => h.id !== id);
+    setHistory(updated);
+    await setValue(STORAGE_KEYS.SPENDING_HISTORY, [...updated].reverse());
+  };
+
+  const deleteWishlist = async (id: string) => {
+    const updated = wishlist.filter((w) => w.id !== id);
+    setWishlist(updated);
+    await setValue(STORAGE_KEYS.WISHLIST, updated);
+  };
 
   const totalSaved = history
     .filter((h) => h.action === "skipped" || h.action === "saved_later")
@@ -379,6 +391,17 @@ const [showChat, setShowChat] = useState(false);
                           >
                             {cfg.label}
                           </span>
+                          <button
+                            onClick={() => deleteHistory(item.id)}
+                            style={{ background: "none", border: "none", cursor: "pointer", color: "#d1d5db", padding: 2, lineHeight: 1 }}
+                            onMouseEnter={e => (e.currentTarget.style.color = "#ef4444")}
+                            onMouseLeave={e => (e.currentTarget.style.color = "#d1d5db")}
+                            title="Remove"
+                          >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
                         </div>
                       </div>
                     );
@@ -416,16 +439,29 @@ const [showChat, setShowChat] = useState(false);
                       </p>
                     )}
                   </div>
-                  <div className="shrink-0 ml-4 text-right">
-                    <p className="text-[15px] font-bold" style={{ color: "#560700", fontFamily: "monospace" }}>${item.product.price}</p>
-                    {item.analysis.riskLevel && (
-                      <p className="text-[10px] font-bold mt-0.5" style={{
-                        color: item.analysis.riskLevel === "High" ? "#ef4444" : item.analysis.riskLevel === "Medium" ? "#f59e0b" : "#34d399",
-                        fontFamily: "monospace",
-                      }}>
-                        {item.analysis.riskLevel} risk
-                      </p>
-                    )}
+                  <div className="shrink-0 ml-4 text-right flex items-center gap-2">
+                    <div>
+                      <p className="text-[15px] font-bold" style={{ color: "#560700", fontFamily: "monospace" }}>${item.product.price}</p>
+                      {item.analysis.riskLevel && (
+                        <p className="text-[10px] font-bold mt-0.5" style={{
+                          color: item.analysis.riskLevel === "High" ? "#ef4444" : item.analysis.riskLevel === "Medium" ? "#f59e0b" : "#34d399",
+                          fontFamily: "monospace",
+                        }}>
+                          {item.analysis.riskLevel} risk
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => deleteWishlist(item.id)}
+                      style={{ background: "none", border: "none", cursor: "pointer", color: "#d1d5db", padding: 2, lineHeight: 1 }}
+                      onMouseEnter={e => (e.currentTarget.style.color = "#ef4444")}
+                      onMouseLeave={e => (e.currentTarget.style.color = "#d1d5db")}
+                      title="Remove"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               )) : (

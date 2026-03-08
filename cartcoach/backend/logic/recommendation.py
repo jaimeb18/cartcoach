@@ -86,8 +86,6 @@ async def answer_question(question: str, product, profile: UserProfile) -> str:
 # --- Gemini implementations ---
 
 async def _gemini_message(product, profile, risk_level, budget_impact, goal_delay_days, future_value_5y, investment_data=None) -> str:
-    tone = _TONE_INSTRUCTIONS.get(profile.tone_mode, _TONE_INSTRUCTIONS[ToneMode.gentle])
-
     investment_context = ""
     if investment_data and investment_data.get("breakdown"):
         lines = []
@@ -95,20 +93,18 @@ async def _gemini_message(product, profile, risk_level, budget_impact, goal_dela
             lines.append(f"  - {opt['vehicle']} ({opt['rate_pct']}%/yr): grows to ${opt['future_value']:.2f} (+${opt['gain']:.2f})")
         investment_context = "\nIf saved and invested for 5 years:\n" + "\n".join(lines)
 
-    prompt = f"""You are CartCoach, a financial wellness assistant.
-{tone}
-Write a brief 1-2 sentence nudge message about this purchase. Mention specific numbers. No emojis.
-Optionally reference one of the investment options if it makes the message more compelling.
+    prompt = f"""Output exactly 3 bullet points (using • ) with factual numbers only. No sentences, no greeting, no opinion, no emojis, no conversational language. Pure financial facts.
 
-Purchase: {product.product_name} — ${product.price:.2f} on {product.site}
-Category: {product.category}
-Budget used: {budget_impact['budget_pct']:.0f}% of ${profile.monthly_budget} monthly budget
-Remaining after purchase: ${budget_impact['remaining_after']:.2f}
-Savings goal: "{profile.savings_goal.name}" ({profile.savings_goal.current_amount:.0f}/{profile.savings_goal.target_amount:.0f} saved)
-Goal delay: {goal_delay_days} days{investment_context}
-Risk level: {risk_level.value}
+Data:
+- Product: {product.product_name} — ${product.price:.2f}
+- Budget used: {budget_impact['budget_pct']:.0f}% of ${profile.monthly_budget}/mo, ${budget_impact['remaining_after']:.2f} remaining
+- Goal "{profile.savings_goal.name}": delayed by {goal_delay_days} days ({profile.savings_goal.current_amount:.0f}/{profile.savings_goal.target_amount:.0f} saved){investment_context}
+- 5-year invested value: ${future_value_5y:.2f}
 
-Write only the message."""
+Output format (fill in real numbers, nothing else):
+• ${product.price:.2f} = {budget_impact['budget_pct']:.0f}% of your ${profile.monthly_budget:.0f}/mo budget, leaving ${budget_impact['remaining_after']:.2f}
+• Delays "{profile.savings_goal.name}" goal by {goal_delay_days} days
+• Invested at 7%/yr over 5 years: ${future_value_5y:.2f}"""
 
     try:
         response = await _model.generate_content_async(prompt)
