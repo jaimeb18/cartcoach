@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export type LedgerRow = {
     id: string;
@@ -19,14 +19,47 @@ const MONTHS = [
 // Generate years from 2020 to 2030
 const YEARS = Array.from({ length: 11 }, (_, i) => 2020 + i);
 
-export default function LedgerTable({ onClose }: { onClose: () => void }) {
+const CATEGORIES = [
+    "Grocery", "Income", "Transportation", "Utilities", "Housing", "Discretionary Spending", "Savings"
+];
+
+export default function LedgerTable() {
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [rows, setRows] = useState<LedgerRow[]>([
-        { id: "initial-1", date: "", description: "", category: "", inflow: "", outflow: "", balance: "", notes: "" },
-        { id: "initial-2", date: "", description: "", category: "", inflow: "", outflow: "", balance: "", notes: "" },
-        { id: "initial-3", date: "", description: "", category: "", inflow: "", outflow: "", balance: "", notes: "" }
-    ]);
     const [editingCell, setEditingCell] = useState<{ id: string, field: keyof LedgerRow } | null>(null);
+    const [suggestion, setSuggestion] = useState<string>("");
+    const prevDateRef = useRef(currentDate);
+
+    const getDateString = (date: Date) => `${MONTHS[date.getMonth()]} , ${date.getFullYear()}`;
+
+    // Initial rows with current date
+    const [rows, setRows] = useState<LedgerRow[]>(
+        Array.from({ length: 10 }).map((_, i) => ({
+            id: `initial-${i}`, date: getDateString(currentDate), description: "", category: "", inflow: "", outflow: "", balance: "", notes: ""
+        }))
+    );
+
+    // Sync dates when calendar month/year changes
+    useEffect(() => {
+        const prevDate = prevDateRef.current;
+        if (prevDate.getMonth() !== currentDate.getMonth() || prevDate.getFullYear() !== currentDate.getFullYear()) {
+            const oldMonth = MONTHS[prevDate.getMonth()];
+            const oldYear = prevDate.getFullYear().toString();
+            const newMonth = MONTHS[currentDate.getMonth()];
+            const newYear = currentDate.getFullYear().toString();
+
+            setRows(prevRows => prevRows.map(row => {
+                let newDate = row.date;
+                if (newDate.includes(oldMonth)) {
+                    newDate = newDate.replace(oldMonth, newMonth);
+                }
+                if (newDate.includes(oldYear)) {
+                    newDate = newDate.replace(oldYear, newYear);
+                }
+                return { ...row, date: newDate };
+            }));
+        }
+        prevDateRef.current = currentDate;
+    }, [currentDate]);
 
     // Calendar Navigation Handlers
     const handlePrevMonth = () => {
@@ -58,6 +91,19 @@ export default function LedgerTable({ onClose }: { onClose: () => void }) {
 
     const handleChange = (id: string, field: keyof LedgerRow, value: string) => {
         setRows(rows.map(r => r.id === id ? { ...r, [field]: value } : r));
+
+        if (field === 'category') {
+            if (value.trim() === "") {
+                setSuggestion("");
+                return;
+            }
+            const match = CATEGORIES.find(c => c.toLowerCase().startsWith(value.toLowerCase()));
+            if (match && match.toLowerCase() !== value.toLowerCase()) {
+                setSuggestion(match);
+            } else {
+                setSuggestion("");
+            }
+        }
     };
 
     const handleBlur = (id: string, field: keyof LedgerRow) => {
@@ -65,6 +111,7 @@ export default function LedgerTable({ onClose }: { onClose: () => void }) {
         setTimeout(() => {
             setEditingCell(current => {
                 if (current?.id === id && current?.field === field) {
+                    setSuggestion("");
                     return null; // Only clear if we haven't already moved to a new cell
                 }
                 return current;
@@ -82,6 +129,12 @@ export default function LedgerTable({ onClose }: { onClose: () => void }) {
                 setEditingCell(null);
             }
         } else if (e.key === "Tab") {
+            if (field === 'category' && suggestion) {
+                e.preventDefault();
+                handleChange(id, field, suggestion);
+                setSuggestion("");
+                return;
+            }
             e.preventDefault();
             const fields: (keyof LedgerRow)[] = ["date", "description", "category", "inflow", "outflow", "balance", "notes"];
             const fieldIndex = fields.indexOf(field);
@@ -113,14 +166,15 @@ export default function LedgerTable({ onClose }: { onClose: () => void }) {
     };
 
     const addRow = () => {
+        const dateString = getDateString(currentDate);
         setRows([...rows, {
             id: Date.now().toString() + Math.random().toString(),
-            date: "", description: "", category: "", inflow: "", outflow: "", balance: "", notes: ""
+            date: dateString, description: "", category: "", inflow: "", outflow: "", balance: "", notes: ""
         }]);
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-white flex flex-col h-screen overflow-hidden">
+        <div className="flex flex-col h-full overflow-hidden bg-white">
             {/* Header and Calendar Controls */}
             <div className="flex justify-between items-center p-6 border-b border-gray-100 shrink-0">
                 <div className="flex items-center gap-6">
@@ -165,38 +219,20 @@ export default function LedgerTable({ onClose }: { onClose: () => void }) {
                         </button>
                     </div>
                 </div>
-
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={addRow}
-                        className="px-4 py-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg text-sm font-medium transition-colors"
-                    >
-                        + Add Row
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="p-2 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-colors group"
-                        title="Close Ledger"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
             </div>
 
             <div className="flex-1 overflow-auto p-6 bg-gray-50">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                    <table className="w-full text-left text-sm text-gray-600">
+                    <table className="w-full table-fixed text-left text-sm text-gray-600">
                         <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th className="px-4 py-3 font-medium">Date</th>
-                                <th className="px-4 py-3 font-medium">Description</th>
-                                <th className="px-4 py-3 font-medium">Category</th>
-                                <th className="px-4 py-3 font-medium">Inflow</th>
-                                <th className="px-4 py-3 font-medium">Outflow</th>
-                                <th className="px-4 py-3 font-medium">Balance</th>
-                                <th className="px-4 py-3 font-medium">Notes</th>
+                                <th className="px-4 py-3 font-medium w-[10%]">Date</th>
+                                <th className="px-4 py-3 font-medium w-[30%]">Description</th>
+                                <th className="px-4 py-3 font-medium w-[12%]">Category</th>
+                                <th className="px-4 py-3 font-medium w-[12%]">Inflow</th>
+                                <th className="px-4 py-3 font-medium w-[12%]">Outflow</th>
+                                <th className="px-4 py-3 font-medium w-[12%]">Balance</th>
+                                <th className="px-4 py-3 font-medium w-[12%]">Notes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -205,22 +241,46 @@ export default function LedgerTable({ onClose }: { onClose: () => void }) {
                                     {(["date", "description", "category", "inflow", "outflow", "balance", "notes"] as const).map(field => (
                                         <td
                                             key={field}
-                                            className="px-4 py-3 cursor-text relative group min-w-[100px]"
+                                            className="px-4 py-3 cursor-text relative group truncate"
                                             onClick={() => handleCellClick(row.id, field)}
                                         >
                                             {editingCell?.id === row.id && editingCell?.field === field ? (
-                                                <input
-                                                    type="text"
-                                                    autoFocus
-                                                    value={row[field]}
-                                                    onChange={(e) => handleChange(row.id, field, e.target.value)}
-                                                    onBlur={() => handleBlur(row.id, field)}
-                                                    onKeyDown={(e) => handleKeyDown(e, row.id, field)}
-                                                    className="w-full p-1.5 -m-1.5 border border-blue-400 rounded outline-none text-sm bg-white shadow-sm z-10 relative"
-                                                />
+                                                <div className="relative w-full h-full flex items-center">
+                                                    {field === 'category' && suggestion && (
+                                                        <div className="absolute left-1.5 text-sm text-gray-400 pointer-events-none whitespace-pre">
+                                                            <span className="opacity-0">{row[field]}</span>
+                                                            {suggestion.substring(row[field].length)}
+                                                        </div>
+                                                    )}
+                                                    <input
+                                                        type="text"
+                                                        autoFocus
+                                                        value={row[field]}
+                                                        onChange={(e) => handleChange(row.id, field, e.target.value)}
+                                                        onBlur={() => handleBlur(row.id, field)}
+                                                        onKeyDown={(e) => handleKeyDown(e, row.id, field)}
+                                                        onFocus={(e) => {
+                                                            if (field === 'date') {
+                                                                const commaIndex = e.target.value.indexOf(',');
+                                                                if (commaIndex !== -1) {
+                                                                    // Position cursor right before the comma
+                                                                    const pos = e.target.value.indexOf(',');
+                                                                    e.target.setSelectionRange(pos, pos);
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="w-full p-1 border border-blue-400 rounded outline-none text-sm bg-transparent shadow-sm z-10 relative"
+                                                    />
+                                                </div>
                                             ) : (
-                                                <div className="min-h-[20px] text-gray-700 break-words">
-                                                    {row[field] ? (
+                                                <div className="min-h-[20px] text-gray-700 truncate">
+                                                    {field === 'date' && row.date.includes(' , ') && !/\d+/.test(row.date.split(',')[0]) ? (
+                                                        <>
+                                                            {row.date.split(' , ')[0]}
+                                                            <span className="inline-block w-6 h-5 bg-gray-100 rounded mx-1 align-middle"></span>
+                                                            , {row.date.split(' , ')[1]}
+                                                        </>
+                                                    ) : row[field] ? (
                                                         (field === 'inflow' || field === 'outflow' || field === 'balance') ? (
                                                             `$${parseFloat(row[field] || '0').toFixed(2)}`
                                                         ) : row[field]
@@ -234,6 +294,19 @@ export default function LedgerTable({ onClose }: { onClose: () => void }) {
                                 </tr>
                             ))}
                         </tbody>
+                        <tfoot className="border-t border-gray-200">
+                            <tr>
+                                <td colSpan={7} className="p-0">
+                                    <button
+                                        onClick={addRow}
+                                        className="w-full py-3 text-sm font-medium text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                                        Add Row
+                                    </button>
+                                </td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
