@@ -6,17 +6,17 @@ import LedgerTable from "../components/LedgerTable";
 import { STORAGE_KEYS } from "@shared/constants";
 import type { UserProfile, SpendingHistory, WishlistItem } from "@shared/types";
 
-type Tab = "overview" | "history" | "wishlist" | "insights";
+type Tab = "overview" | "history" | "wishlist" | "insights" | "ledger";
 
 const CATEGORY_COLORS = [
   "#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#ec4899",
 ];
 
 const ACTION_CONFIG: Record<string, { label: string; dot: string; badge: string }> = {
-  skipped:     { label: "Skipped",   dot: "#10b981", badge: "bg-emerald-50 text-emerald-700" },
-  purchased:   { label: "Purchased", dot: "#ef4444", badge: "bg-red-50 text-red-600" },
-  saved_later: { label: "Saved",     dot: "#f59e0b", badge: "bg-amber-50 text-amber-700" },
-  cooldown:    { label: "Cooldown",  dot: "#6366f1", badge: "bg-indigo-50 text-indigo-600" },
+  skipped: { label: "Skipped", dot: "#10b981", badge: "bg-emerald-50 text-emerald-700" },
+  purchased: { label: "Purchased", dot: "#ef4444", badge: "bg-red-50 text-red-600" },
+  saved_later: { label: "Saved", dot: "#f59e0b", badge: "bg-amber-50 text-amber-700" },
+  cooldown: { label: "Cooldown", dot: "#6366f1", badge: "bg-indigo-50 text-indigo-600" },
 };
 
 const PROJECTION_YEARS = [0, 1, 3, 5, 10, 20] as const;
@@ -63,6 +63,18 @@ const NAV_ITEMS: { id: Tab; label: string; icon: JSX.Element }[] = [
       </svg>
     ),
   },
+  {
+    id: "ledger",
+    label: "Ledger",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <line x1="3" y1="9" x2="21" y2="9" />
+        <line x1="3" y1="15" x2="21" y2="15" />
+        <line x1="9" y1="9" x2="9" y2="21" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Dashboard() {
@@ -71,7 +83,6 @@ export default function Dashboard() {
   const [history, setHistory] = useState<SpendingHistory[]>([]);
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [tab, setTab] = useState<Tab>("overview");
-  const [showLedger, setShowLedger] = useState(false);
 
   useEffect(() => {
     getValue<UserProfile>(STORAGE_KEYS.USER_PROFILE).then((p) => p && setProfile(p));
@@ -161,20 +172,6 @@ export default function Dashboard() {
             );
           })}
 
-          {/* Ledger button */}
-          <button
-            onClick={() => setShowLedger(true)}
-            title="Open Ledger"
-            className="flex items-center justify-center w-10 h-10 rounded-xl transition-colors mt-1"
-            style={{ color: "#9ca3af" }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <line x1="3" y1="9" x2="21" y2="9" />
-              <line x1="3" y1="15" x2="21" y2="15" />
-              <line x1="9" y1="9" x2="9" y2="21" />
-            </svg>
-          </button>
         </div>
 
         {/* Settings */}
@@ -192,258 +189,260 @@ export default function Dashboard() {
       </aside>
 
       {/* ── Main content ── */}
-      <main className="flex-1 min-h-screen" style={{ marginLeft: 64 }}>
-        <div className="max-w-3xl mx-auto px-6 py-7 space-y-5">
-
-          <div>
-            <h1 className="text-[22px] font-bold text-gray-900 leading-tight">
-              {NAV_ITEMS.find((n) => n.id === tab)?.label}
-            </h1>
-            <p className="text-[13px] text-gray-400 mt-0.5">CartCoach · Financial Wellness</p>
+      <main className="flex-1 min-h-screen flex flex-col bg-white" style={{ marginLeft: 64 }}>
+        {tab === "ledger" ? (
+          <div className="flex-1 flex flex-col h-screen overflow-hidden">
+            <LedgerTable />
           </div>
+        ) : (
+          <div className="max-w-3xl mx-auto px-6 py-7 space-y-5 w-full bg-[#f4f5f9] min-h-screen">
+            <div>
+              <h1 className="text-[22px] font-bold text-gray-900 leading-tight">
+                {NAV_ITEMS.find((n) => n.id === tab)?.label}
+              </h1>
+              <p className="text-[13px] text-gray-400 mt-0.5">CartCoach · Financial Wellness</p>
+            </div>
 
-          {/* ══ OVERVIEW ══ */}
-          {tab === "overview" && (
-            <>
-              <div
-                className="rounded-2xl p-6 relative overflow-hidden"
-                style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #14352a 100%)" }}
-              >
-                <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(74,222,128,0.12), transparent 70%)" }} />
-                <div className="absolute right-12 -bottom-14 w-52 h-52 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.1), transparent 70%)" }} />
-                <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-2">Total Saved</p>
-                <div className="flex items-end gap-2 mb-7">
-                  <span className="text-5xl font-bold text-white leading-none tracking-tight">${totalSaved.toFixed(0)}</span>
-                  {totalSaved > 0 && (
-                    <span className="text-emerald-400 text-xs font-semibold mb-1.5 flex items-center gap-0.5">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5H7z" /></svg>
-                      great work
-                    </span>
+            {/* ══ OVERVIEW ══ */}
+            {tab === "overview" && (
+              <>
+                <div
+                  className="rounded-2xl p-6 relative overflow-hidden"
+                  style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e293b 55%, #14352a 100%)" }}
+                >
+                  <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(74,222,128,0.12), transparent 70%)" }} />
+                  <div className="absolute right-12 -bottom-14 w-52 h-52 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(99,102,241,0.1), transparent 70%)" }} />
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-2">Total Saved</p>
+                  <div className="flex items-end gap-2 mb-7">
+                    <span className="text-5xl font-bold text-white leading-none tracking-tight">${totalSaved.toFixed(0)}</span>
+                    {totalSaved > 0 && (
+                      <span className="text-emerald-400 text-xs font-semibold mb-1.5 flex items-center gap-0.5">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5H7z" /></svg>
+                        great work
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 divide-x divide-white/10">
+                    <div className="pr-6">
+                      <p className="text-xl font-semibold text-white">{skippedCount}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">buys skipped</p>
+                    </div>
+                    <div className="px-6">
+                      <p className="text-xl font-semibold text-white">${futureValueTotal.toFixed(0)}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">in 5 yrs @ 7%</p>
+                    </div>
+                    <div className="pl-6">
+                      <p className="text-xl font-semibold text-white">{wishlist.length}</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">on wishlist</p>
+                    </div>
+                  </div>
+                </div>
+
+                {profile && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <BudgetCard spent={profile.monthlySaved} budget={profile.monthlyBudget} />
+                    <GoalProgress goal={profile.savingsGoal} />
+                  </div>
+                )}
+
+                <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-4">Spending by Category</p>
+                  {categoryData.length > 0 ? (
+                    <div className="space-y-3.5">
+                      {categoryData.map(([cat, amount], i) => (
+                        <div key={cat} className="flex items-center gap-4">
+                          <div className="flex items-center gap-2 w-28 shrink-0">
+                            <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
+                            <span className="text-[13px] text-gray-600 truncate">{cat}</span>
+                          </div>
+                          <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                            <div className="h-1.5 rounded-full transition-all" style={{ width: `${(amount / maxAmount) * 100}%`, backgroundColor: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
+                          </div>
+                          <span className="text-[13px] font-semibold text-gray-700 w-14 text-right shrink-0">${amount.toFixed(0)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center">
+                      <p className="text-[13px] text-gray-400">No spending data yet.</p>
+                      <p className="text-xs text-gray-300 mt-1">CartCoach tracks your decisions as you shop.</p>
+                    </div>
                   )}
                 </div>
-                <div className="grid grid-cols-3 divide-x divide-white/10">
-                  <div className="pr-6">
-                    <p className="text-xl font-semibold text-white">{skippedCount}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">buys skipped</p>
+              </>
+            )}
+
+            {/* ══ HISTORY ══ */}
+            {tab === "history" && (
+              <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                {history.length > 0 ? (
+                  <div className="divide-y divide-gray-50">
+                    {history.slice(0, 30).map((item) => {
+                      const cfg = ACTION_CONFIG[item.action] ?? ACTION_CONFIG["skipped"];
+                      return (
+                        <div key={item.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-0.5 h-7 rounded-full shrink-0" style={{ backgroundColor: cfg.dot }} />
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-medium text-gray-800 truncate leading-tight">{item.product.productName}</p>
+                              <p className="text-[11px] text-gray-400 mt-0.5">
+                                {item.product.site} · {new Date(item.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2.5 shrink-0 ml-3">
+                            <span className="text-[13px] font-semibold text-gray-700">${item.product.price}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${cfg.badge}`}>{cfg.label}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="px-6">
-                    <p className="text-xl font-semibold text-white">${futureValueTotal.toFixed(0)}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">in 5 yrs @ 7%</p>
+                ) : (
+                  <div className="py-16 text-center">
+                    <p className="text-[13px] text-gray-400">No history yet.</p>
+                    <p className="text-xs text-gray-300 mt-1">Items appear here after CartCoach analyzes a product.</p>
                   </div>
-                  <div className="pl-6">
-                    <p className="text-xl font-semibold text-white">{wishlist.length}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">on wishlist</p>
-                  </div>
-                </div>
+                )}
               </div>
+            )}
 
-              {profile && (
-                <div className="grid grid-cols-2 gap-4">
-                  <BudgetCard spent={profile.monthlySaved} budget={profile.monthlyBudget} />
-                  <GoalProgress goal={profile.savingsGoal} />
-                </div>
-              )}
+            {/* ══ WISHLIST ══ */}
+            {tab === "wishlist" && (
+              <div className="space-y-2">
+                {wishlist.length > 0 ? wishlist.map((item) => (
+                  <div key={item.id} className="bg-white flex items-center justify-between px-5 py-4 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-medium text-gray-800 truncate">{item.product.productName}</p>
+                      <p className="text-[11px] text-gray-400 mt-0.5">{item.product.site} · {item.product.category}</p>
+                      {item.remindAt && (
+                        <p className="text-[11px] text-indigo-500 font-medium mt-1">
+                          Reminder: {new Date(item.remindAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </p>
+                      )}
+                    </div>
+                    <div className="shrink-0 ml-4 text-right">
+                      <p className="text-[15px] font-bold text-gray-900">${item.product.price}</p>
+                      {item.analysis.riskLevel && (
+                        <p className={`text-[10px] font-semibold mt-0.5 ${item.analysis.riskLevel === "High" ? "text-red-500"
+                          : item.analysis.riskLevel === "Medium" ? "text-amber-500"
+                            : "text-emerald-500"
+                          }`}>{item.analysis.riskLevel} risk</p>
+                      )}
+                    </div>
+                  </div>
+                )) : (
+                  <div className="bg-white rounded-2xl py-16 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                    <p className="text-[13px] text-gray-400">Your wishlist is empty.</p>
+                    <p className="text-xs text-gray-300 mt-1">Tap "Save for later" at checkout to add items here.</p>
+                  </div>
+                )}
+              </div>
+            )}
 
-              <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-4">Spending by Category</p>
-                {categoryData.length > 0 ? (
-                  <div className="space-y-3.5">
-                    {categoryData.map(([cat, amount], i) => (
-                      <div key={cat} className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 w-28 shrink-0">
-                          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
-                          <span className="text-[13px] text-gray-600 truncate">{cat}</span>
-                        </div>
-                        <div className="flex-1 bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                          <div className="h-1.5 rounded-full transition-all" style={{ width: `${(amount / maxAmount) * 100}%`, backgroundColor: CATEGORY_COLORS[i % CATEGORY_COLORS.length] }} />
-                        </div>
-                        <span className="text-[13px] font-semibold text-gray-700 w-14 text-right shrink-0">${amount.toFixed(0)}</span>
+            {/* ══ INSIGHTS ══ */}
+            {tab === "insights" && (
+              <div className="space-y-5">
+                <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                  <div className="flex items-baseline justify-between mb-1">
+                    <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Investment Potential</p>
+                    <span className="text-[10px] text-gray-300">7% annual return</span>
+                  </div>
+                  <p className="text-[12px] text-gray-500 mb-4">If you invested the ${totalSaved.toFixed(0)} you avoided spending:</p>
+                  <div className="overflow-x-auto">
+                    <svg viewBox={`0 0 ${CHART_W} ${CHART_H + 36}`} width="100%" style={{ minWidth: 280 }}>
+                      {projectionData.map((d, i) => {
+                        const barH = Math.max(4, (d.value / maxProjection) * CHART_H);
+                        const x = slotW * i + (slotW - BAR_W) / 2;
+                        const y = CHART_H - barH;
+                        const isLast = i === projectionData.length - 1;
+                        return (
+                          <g key={d.label}>
+                            <rect x={x} y={0} width={BAR_W} height={CHART_H} rx="6" fill="#f8fafc" />
+                            <rect x={x} y={y} width={BAR_W} height={barH} rx="6" fill={isLast ? "#6366f1" : "#e0e7ff"} />
+                            <text x={x + BAR_W / 2} y={y - 5} textAnchor="middle" fontSize="9" fontWeight="600" fill={isLast ? "#6366f1" : "#94a3b8"}>
+                              ${d.value >= 1000 ? `${(d.value / 1000).toFixed(1)}k` : d.value.toFixed(0)}
+                            </text>
+                            <text x={x + BAR_W / 2} y={CHART_H + 16} textAnchor="middle" fontSize="10" fill="#94a3b8" fontWeight={isLast ? "700" : "400"}>
+                              {d.label}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </svg>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    {projectionData.filter((d) => [5, 10, 20].includes(Number(d.label.replace("yr", "")))).map((d) => (
+                      <div key={d.label} className="rounded-xl px-3 py-2.5 text-center" style={{ backgroundColor: "#f5f3ff" }}>
+                        <p className="text-[10px] text-indigo-400 font-medium">{d.label}</p>
+                        <p className="text-[15px] font-bold text-indigo-700 mt-0.5">
+                          ${d.value >= 1000 ? `${(d.value / 1000).toFixed(1)}k` : d.value.toFixed(0)}
+                        </p>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="py-8 text-center">
-                    <p className="text-[13px] text-gray-400">No spending data yet.</p>
-                    <p className="text-xs text-gray-300 mt-1">CartCoach tracks your decisions as you shop.</p>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
+                </div>
 
-          {/* ══ HISTORY ══ */}
-          {tab === "history" && (
-            <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-              {history.length > 0 ? (
-                <div className="divide-y divide-gray-50">
-                  {history.slice(0, 30).map((item) => {
-                    const cfg = ACTION_CONFIG[item.action] ?? ACTION_CONFIG["skipped"];
-                    return (
-                      <div key={item.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-0.5 h-7 rounded-full shrink-0" style={{ backgroundColor: cfg.dot }} />
-                          <div className="min-w-0">
-                            <p className="text-[13px] font-medium text-gray-800 truncate leading-tight">{item.product.productName}</p>
-                            <p className="text-[11px] text-gray-400 mt-0.5">
-                              {item.product.site} · {new Date(item.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                  <div className="px-5 pt-5 pb-3">
+                    <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Monthly Breakdown</p>
+                  </div>
+                  {monthlyRows.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-4 px-5 py-2 bg-gray-50 border-t border-b border-gray-100">
+                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Month</p>
+                        <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wide text-right">Avoided</p>
+                        <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wide text-right">Spent</p>
+                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide text-right">Net</p>
+                      </div>
+                      {monthlyRows.map(([month, data]) => {
+                        const net = data.avoided - data.spent;
+                        return (
+                          <div key={month} className="grid grid-cols-4 px-5 py-3.5 border-b border-gray-50 hover:bg-gray-50 transition-colors last:border-0">
+                            <div>
+                              <p className="text-[13px] font-medium text-gray-700">{month}</p>
+                              <p className="text-[10px] text-gray-400 mt-0.5">{data.skipped + data.purchased} decisions</p>
+                            </div>
+                            <p className="text-[13px] font-semibold text-emerald-600 text-right self-center">+${data.avoided.toFixed(0)}</p>
+                            <p className="text-[13px] font-semibold text-red-400 text-right self-center">{data.spent > 0 ? `-$${data.spent.toFixed(0)}` : "—"}</p>
+                            <p className={`text-[13px] font-bold text-right self-center ${net >= 0 ? "text-gray-800" : "text-red-500"}`}>
+                              {net >= 0 ? `$${net.toFixed(0)}` : `-$${Math.abs(net).toFixed(0)}`}
                             </p>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-2.5 shrink-0 ml-3">
-                          <span className="text-[13px] font-semibold text-gray-700">${item.product.price}</span>
-                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${cfg.badge}`}>{cfg.label}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="py-16 text-center">
-                  <p className="text-[13px] text-gray-400">No history yet.</p>
-                  <p className="text-xs text-gray-300 mt-1">Items appear here after CartCoach analyzes a product.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ══ WISHLIST ══ */}
-          {tab === "wishlist" && (
-            <div className="space-y-2">
-              {wishlist.length > 0 ? wishlist.map((item) => (
-                <div key={item.id} className="bg-white flex items-center justify-between px-5 py-4 rounded-2xl border border-gray-100 hover:border-gray-200 transition-colors" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-medium text-gray-800 truncate">{item.product.productName}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">{item.product.site} · {item.product.category}</p>
-                    {item.remindAt && (
-                      <p className="text-[11px] text-indigo-500 font-medium mt-1">
-                        Reminder: {new Date(item.remindAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </p>
-                    )}
-                  </div>
-                  <div className="shrink-0 ml-4 text-right">
-                    <p className="text-[15px] font-bold text-gray-900">${item.product.price}</p>
-                    {item.analysis.riskLevel && (
-                      <p className={`text-[10px] font-semibold mt-0.5 ${
-                        item.analysis.riskLevel === "High" ? "text-red-500"
-                        : item.analysis.riskLevel === "Medium" ? "text-amber-500"
-                        : "text-emerald-500"
-                      }`}>{item.analysis.riskLevel} risk</p>
-                    )}
-                  </div>
-                </div>
-              )) : (
-                <div className="bg-white rounded-2xl py-16 text-center" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-                  <p className="text-[13px] text-gray-400">Your wishlist is empty.</p>
-                  <p className="text-xs text-gray-300 mt-1">Tap "Save for later" at checkout to add items here.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* ══ INSIGHTS ══ */}
-          {tab === "insights" && (
-            <div className="space-y-5">
-              <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-                <div className="flex items-baseline justify-between mb-1">
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Investment Potential</p>
-                  <span className="text-[10px] text-gray-300">7% annual return</span>
-                </div>
-                <p className="text-[12px] text-gray-500 mb-4">If you invested the ${totalSaved.toFixed(0)} you avoided spending:</p>
-                <div className="overflow-x-auto">
-                  <svg viewBox={`0 0 ${CHART_W} ${CHART_H + 36}`} width="100%" style={{ minWidth: 280 }}>
-                    {projectionData.map((d, i) => {
-                      const barH = Math.max(4, (d.value / maxProjection) * CHART_H);
-                      const x = slotW * i + (slotW - BAR_W) / 2;
-                      const y = CHART_H - barH;
-                      const isLast = i === projectionData.length - 1;
-                      return (
-                        <g key={d.label}>
-                          <rect x={x} y={0} width={BAR_W} height={CHART_H} rx="6" fill="#f8fafc" />
-                          <rect x={x} y={y} width={BAR_W} height={barH} rx="6" fill={isLast ? "#6366f1" : "#e0e7ff"} />
-                          <text x={x + BAR_W / 2} y={y - 5} textAnchor="middle" fontSize="9" fontWeight="600" fill={isLast ? "#6366f1" : "#94a3b8"}>
-                            ${d.value >= 1000 ? `${(d.value / 1000).toFixed(1)}k` : d.value.toFixed(0)}
-                          </text>
-                          <text x={x + BAR_W / 2} y={CHART_H + 16} textAnchor="middle" fontSize="10" fill="#94a3b8" fontWeight={isLast ? "700" : "400"}>
-                            {d.label}
-                          </text>
-                        </g>
-                      );
-                    })}
-                  </svg>
-                </div>
-                <div className="grid grid-cols-3 gap-2 mt-3">
-                  {projectionData.filter((d) => [5, 10, 20].includes(Number(d.label.replace("yr", "")))).map((d) => (
-                    <div key={d.label} className="rounded-xl px-3 py-2.5 text-center" style={{ backgroundColor: "#f5f3ff" }}>
-                      <p className="text-[10px] text-indigo-400 font-medium">{d.label}</p>
-                      <p className="text-[15px] font-bold text-indigo-700 mt-0.5">
-                        ${d.value >= 1000 ? `${(d.value / 1000).toFixed(1)}k` : d.value.toFixed(0)}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-                <div className="px-5 pt-5 pb-3">
-                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Monthly Breakdown</p>
-                </div>
-                {monthlyRows.length > 0 ? (
-                  <>
-                    <div className="grid grid-cols-4 px-5 py-2 bg-gray-50 border-t border-b border-gray-100">
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Month</p>
-                      <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wide text-right">Avoided</p>
-                      <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wide text-right">Spent</p>
-                      <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide text-right">Net</p>
-                    </div>
-                    {monthlyRows.map(([month, data]) => {
-                      const net = data.avoided - data.spent;
-                      return (
-                        <div key={month} className="grid grid-cols-4 px-5 py-3.5 border-b border-gray-50 hover:bg-gray-50 transition-colors last:border-0">
-                          <div>
-                            <p className="text-[13px] font-medium text-gray-700">{month}</p>
-                            <p className="text-[10px] text-gray-400 mt-0.5">{data.skipped + data.purchased} decisions</p>
+                        );
+                      })}
+                      {monthlyRows.length > 1 && (() => {
+                        const totAvoided = monthlyRows.reduce((s, [, d]) => s + d.avoided, 0);
+                        const totSpent = monthlyRows.reduce((s, [, d]) => s + d.spent, 0);
+                        const totNet = totAvoided - totSpent;
+                        return (
+                          <div className="grid grid-cols-4 px-5 py-3.5 bg-gray-50 border-t border-gray-100">
+                            <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide self-center">Total</p>
+                            <p className="text-[13px] font-bold text-emerald-600 text-right self-center">+${totAvoided.toFixed(0)}</p>
+                            <p className="text-[13px] font-bold text-red-400 text-right self-center">{totSpent > 0 ? `-$${totSpent.toFixed(0)}` : "—"}</p>
+                            <p className={`text-[13px] font-bold text-right self-center ${totNet >= 0 ? "text-gray-900" : "text-red-500"}`}>
+                              {totNet >= 0 ? `$${totNet.toFixed(0)}` : `-$${Math.abs(totNet).toFixed(0)}`}
+                            </p>
                           </div>
-                          <p className="text-[13px] font-semibold text-emerald-600 text-right self-center">+${data.avoided.toFixed(0)}</p>
-                          <p className="text-[13px] font-semibold text-red-400 text-right self-center">{data.spent > 0 ? `-$${data.spent.toFixed(0)}` : "—"}</p>
-                          <p className={`text-[13px] font-bold text-right self-center ${net >= 0 ? "text-gray-800" : "text-red-500"}`}>
-                            {net >= 0 ? `$${net.toFixed(0)}` : `-$${Math.abs(net).toFixed(0)}`}
-                          </p>
-                        </div>
-                      );
-                    })}
-                    {monthlyRows.length > 1 && (() => {
-                      const totAvoided = monthlyRows.reduce((s, [, d]) => s + d.avoided, 0);
-                      const totSpent   = monthlyRows.reduce((s, [, d]) => s + d.spent, 0);
-                      const totNet     = totAvoided - totSpent;
-                      return (
-                        <div className="grid grid-cols-4 px-5 py-3.5 bg-gray-50 border-t border-gray-100">
-                          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide self-center">Total</p>
-                          <p className="text-[13px] font-bold text-emerald-600 text-right self-center">+${totAvoided.toFixed(0)}</p>
-                          <p className="text-[13px] font-bold text-red-400 text-right self-center">{totSpent > 0 ? `-$${totSpent.toFixed(0)}` : "—"}</p>
-                          <p className={`text-[13px] font-bold text-right self-center ${totNet >= 0 ? "text-gray-900" : "text-red-500"}`}>
-                            {totNet >= 0 ? `$${totNet.toFixed(0)}` : `-$${Math.abs(totNet).toFixed(0)}`}
-                          </p>
-                        </div>
-                      );
-                    })()}
-                  </>
-                ) : (
-                  <div className="py-12 text-center">
-                    <p className="text-[13px] text-gray-400">No data yet.</p>
-                    <p className="text-xs text-gray-300 mt-1">Monthly records appear as you use CartCoach.</p>
-                  </div>
-                )}
+                        );
+                      })()}
+                    </>
+                  ) : (
+                    <div className="py-12 text-center">
+                      <p className="text-[13px] text-gray-400">No data yet.</p>
+                      <p className="text-xs text-gray-300 mt-1">Monthly records appear as you use CartCoach.</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <p className="text-[11px] text-center text-gray-300 pb-2">
-            General financial wellness insights only · Not financial advice · 7% annual return is an estimate
-          </p>
-        </div>
+            <p className="text-[11px] text-center text-gray-300 pb-2 mt-auto pt-4">
+              General financial wellness insights only · Not financial advice · 7% annual return is an estimate
+            </p>
+          </div>
+        )}
       </main>
-
-      {showLedger && <LedgerTable onClose={() => setShowLedger(false)} />}
     </div>
   );
 }
