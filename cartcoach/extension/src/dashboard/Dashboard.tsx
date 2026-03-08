@@ -113,11 +113,19 @@ const [showChat, setShowChat] = useState(false);
   };
 
   const totalSaved = history
-    .filter((h) => h.action === "skipped" || h.action === "saved_later")
+    .filter((h) => h.action === "saved_later")
     .reduce((sum, h) => sum + h.product.price, 0);
 
-  const skippedCount = history.filter((h) => h.action === "skipped").length;
+  const avoidedCount = history.filter((h) => h.action === "skipped" || h.action === "saved_later").length;
   const futureValueTotal = totalSaved * Math.pow(1.07, 5);
+
+  const now = new Date();
+  const monthlySpent = history
+    .filter((h) => {
+      const d = new Date(h.timestamp);
+      return h.action === "purchased" && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    })
+    .reduce((sum, h) => sum + h.product.price, 0);
 
   const categoryData = Object.entries(
     history.reduce<Record<string, number>>((acc, h) => {
@@ -305,7 +313,7 @@ const [showChat, setShowChat] = useState(false);
                 </div>
                 <div className="grid grid-cols-3 gap-0">
                   {[
-                    { value: skippedCount, label: "buys skipped" },
+                    { value: avoidedCount, label: "purchases avoided" },
                     { value: `$${futureValueTotal.toFixed(0)}`, label: "in 5 yrs @ 7%" },
                     { value: wishlist.length, label: "on wishlist" },
                   ].map(({ value, label }, i) => (
@@ -320,7 +328,7 @@ const [showChat, setShowChat] = useState(false);
 
               {profile && (
                 <div className="grid grid-cols-2 gap-4">
-                  <BudgetCard spent={profile.monthlySaved} budget={profile.monthlyBudget} />
+                  <BudgetCard spent={monthlySpent} budget={profile.monthlyBudget} />
                   <GoalProgress goal={profile.savingsGoal} />
                 </div>
               )}
