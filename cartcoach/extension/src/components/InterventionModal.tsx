@@ -25,6 +25,45 @@ export default function InterventionModal({
   onClose,
 }: Props) {
   const [showAlts, setShowAlts] = useState(false);
+  const [showSkipFollowUp, setShowSkipFollowUp] = useState(false);
+
+  if (showSkipFollowUp) {
+    return (
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999999] flex items-center justify-center p-4">
+        <div
+          className="bg-white rounded-3xl shadow-2xl animate-slide-up flex flex-col items-center"
+          style={{ width: "420px", maxWidth: "95vw", padding: "32px 28px", gap: 20 }}
+        >
+          <img src={mochiImg} alt="Mochi" style={{ width: 100, height: 100, objectFit: "contain", filter: "drop-shadow(0 4px 12px rgba(232,160,188,0.4))" }} />
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontWeight: 800, fontSize: 18, color: "#c0506a", margin: "0 0 6px" }}>nice choice! 🎉</p>
+            <p style={{ fontSize: 13, color: "#6b7280", margin: 0, lineHeight: 1.5 }}>
+              what are you doing with the <span style={{ fontWeight: 700, color: "#374151" }}>${product.price}</span> you saved?
+            </p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%" }}>
+            <button
+              onClick={onSaveLater}
+              style={{ background: "#e8a0bc", color: "#fff", fontWeight: 700, padding: "13px 0", borderRadius: 14, border: "none", cursor: "pointer", fontSize: 14, width: "100%" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#d4789e")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#e8a0bc")}
+            >
+              putting it into savings 🐷
+            </button>
+            <button
+              onClick={onSkip}
+              style={{ background: "#fdf2f8", color: "#c0506a", fontWeight: 700, padding: "13px 0", borderRadius: 14, border: "1.5px solid #f9c8d8", cursor: "pointer", fontSize: 14, width: "100%" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "#fce7f3")}
+              onMouseLeave={e => (e.currentTarget.style.background = "#fdf2f8")}
+            >
+              spending it elsewhere
+            </button>
+          </div>
+          <p style={{ fontSize: 10, color: "#d1d5db", margin: 0 }}>Educational estimate only · Not financial advice</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999999] flex items-center justify-center p-4">
@@ -144,7 +183,7 @@ export default function InterventionModal({
             <div className="space-y-2">
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={onSkip}
+                  onClick={() => setShowSkipFollowUp(true)}
                   style={{ background: "#e8a0bc", color: "#fff", fontWeight: 700, padding: "11px 0", borderRadius: 14, border: "none", cursor: "pointer", fontSize: 14 }}
                   onMouseEnter={e => (e.currentTarget.style.background = "#d4789e")}
                   onMouseLeave={e => (e.currentTarget.style.background = "#e8a0bc")}

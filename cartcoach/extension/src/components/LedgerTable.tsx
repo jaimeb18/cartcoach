@@ -21,15 +21,16 @@ function historyToRow(item: SpendingHistory): LedgerRow {
     const d = new Date(item.timestamp);
     const date = `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
     const isPurchase = item.action === "purchased";
+    const isSaved = item.action === "saved_later";
     return {
         id: item.id,
         date,
         description: item.product.productName,
-        category: item.product.category,
-        inflow: isPurchase ? "" : item.product.price.toString(),
-        outflow: isPurchase ? item.product.price.toString() : "",
+        category: isSaved ? "Savings" : item.product.category,
+        inflow: "",
+        outflow: (isPurchase || isSaved) ? item.product.price.toString() : "",
         balance: "",
-        notes: item.product.site,
+        notes: isSaved ? "transferred to savings" : item.product.site,
     };
 }
 
@@ -49,7 +50,7 @@ export default function LedgerTable({ history = [] }: { history?: SpendingHistor
     const getDateString = (date: Date) => `${MONTHS[date.getMonth()]} , ${date.getFullYear()}`;
 
     const [rows, setRows] = useState<LedgerRow[]>(() => [
-        ...history.map(historyToRow),
+        ...history.filter(h => h.action !== "skipped").map(historyToRow),
         ...Array.from({ length: 5 }).map((_, i) => ({
             id: `empty-${i}`, date: getDateString(new Date()), description: "", category: "", inflow: "", outflow: "", balance: "", notes: ""
         })),
